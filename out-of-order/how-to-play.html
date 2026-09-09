@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Play — OUT OF ORDER</title>
+  <meta name="description" content="How to play OUT OF ORDER: read the references, put them oldest to newest, score points, take risks.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-howto">
+
+  <div class="filmstrip" aria-hidden="true"></div>
+
+  <nav class="site-nav" aria-label="Main">
+    <div class="site-nav__inner">
+      <a class="site-nav__brand" href="index.html">
+        <img class="site-nav__logo" src="assets/images/logo.png" alt="" width="34" height="34">
+        OUT OF ORDER
+      </a>
+      <ul class="site-nav__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="game.html">Play</a></li>
+        <li><a href="how-to-play.html" aria-current="page">How to Play</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="howto" id="main">
+
+    <header class="howto__hero">
+      <h1 class="howto__title">How to Play</h1>
+      <p class="howto__lede">One daily run. 10 rounds. About 3 minutes.</p>
+    </header>
+
+    <!-- ---------- FOUR STEPS ---------- -->
+    <ol class="steps">
+      <li class="step">
+        <span class="step__num">01</span>
+        <div class="step__art step__art--read" aria-hidden="true">
+          <span class="poster poster--mini"><span class="poster__stripe"></span><span class="poster__initial">?</span></span>
+          <span class="poster poster--mini"><span class="poster__stripe"></span><span class="poster__initial">?</span></span>
+        </div>
+        <h2 class="step__heading">Read</h2>
+        <p class="step__text">Recognise the Movies &amp; TV references on the cards. You usually
+          won't need the exact year &mdash; just <em>&ldquo;I know this came before that.&rdquo;</em></p>
+      </li>
+
+      <li class="step">
+        <span class="step__num">02</span>
+        <div class="step__art step__art--order" aria-hidden="true">
+          <span class="mini-card">A</span>
+          <span class="mini-arrow">&rarr;</span>
+          <span class="mini-card">B</span>
+          <span class="mini-arrow">&rarr;</span>
+          <span class="mini-card">C</span>
+        </div>
+        <h2 class="step__heading">Order</h2>
+        <p class="step__text">Put them <strong>oldest &rarr; newest</strong>. Drag with a mouse,
+          or use the <strong>Move earlier / Move later</strong> buttons on every card.</p>
+      </li>
+
+      <li class="step">
+        <span class="step__num">03</span>
+        <div class="step__art step__art--score" aria-hidden="true">
+          <span class="chip">+100 base</span>
+          <span class="chip">+ up to 100 speed</span>
+        </div>
+        <h2 class="step__heading">Score</h2>
+        <p class="step__text">A correct answer is <strong>100 points</strong>. Answer while the
+          timer is high for a <strong>speed bonus</strong> up to +100.</p>
+      </li>
+
+      <li class="step">
+        <span class="step__num">04</span>
+        <div class="step__art step__art--risk" aria-hidden="true">
+          <span class="chip chip--warn">&#9888; Double Down &times;2</span>
+        </div>
+        <h2 class="step__heading">Risk</h2>
+        <p class="step__text">Feeling confident? Activate <strong>Double Down &times;2</strong>
+          before you submit. Right = double points. Wrong = zero, and your streak resets.</p>
+      </li>
+    </ol>
+
+    <!-- ---------- THE TIMER ---------- -->
+    <section class="howto__panel howto__panel--timer" aria-labelledby="timer-heading">
+      <h2 id="timer-heading" class="section-label">The timer does not end the round</h2>
+      <p>When the timer reaches zero you can <strong>still answer</strong>. You only lose the
+        speed bonus &mdash; the screen shows <strong>&ldquo;No speed bonus&rdquo;</strong>.
+        There is no &ldquo;time's up&rdquo; and no automatic fail. Tension without frustration.</p>
+      <table class="mini-table">
+        <caption class="sr-only">Speed bonus by seconds remaining</caption>
+        <thead><tr><th scope="col">Seconds left</th><th scope="col">Speed bonus</th></tr></thead>
+        <tbody>
+          <tr><td>12&ndash;15</td><td>+100</td></tr>
+          <tr><td>8&ndash;11</td><td>+75</td></tr>
+          <tr><td>4&ndash;7</td><td>+50</td></tr>
+          <tr><td>1&ndash;3</td><td>+25</td></tr>
+          <tr><td>0</td><td>No speed bonus</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ---------- EXTRAS ---------- -->
+    <section class="howto__panel" aria-labelledby="extras-heading">
+      <h2 id="extras-heading" class="section-label">Streak, Heat &amp; Power-ups</h2>
+      <dl class="def-list">
+        <dt>Streak</dt>
+        <dd>Consecutive correct answers. A wrong answer sets it back to zero. Streak doesn't
+          multiply your score &mdash; it drives Heat and unlocks power-ups.</dd>
+
+        <dt>Heat</dt>
+        <dd>Calm &rarr; Warm (streak 3) &rarr; Hot (streak 5) &rarr; On Fire (streak 7+). The
+          environment gets louder; the challenge itself stays clean and readable.</dd>
+
+        <dt><span class="pill">+5 SEC</span></dt>
+        <dd>Unlocks at streak 3. Adds five seconds to the current challenge. One charge.</dd>
+
+        <dt><span class="pill">Reveal</span></dt>
+        <dd>Unlocks at streak 6. Reveals the release year of one card you choose. One charge.</dd>
+      </dl>
+    </section>
+
+    <!-- ---------- CHALLENGE TYPES ---------- -->
+    <section class="howto__panel" aria-labelledby="types-heading">
+      <h2 id="types-heading" class="section-label">Three kinds of challenge</h2>
+      <div class="type-grid">
+        <article class="type-card">
+          <h3>Order</h3>
+          <p>Drag 3&ndash;5 cards into chronological order, oldest to newest.</p>
+        </article>
+        <article class="type-card">
+          <h3>Before / After</h3>
+          <p>One reference title, one comparison title. Did it come <strong>before</strong> or
+            <strong>after</strong>?</p>
+        </article>
+        <article class="type-card">
+          <h3>Insert</h3>
+          <p>A timeline with a gap. Drop the new title into the slot where it belongs.</p>
+        </article>
+      </div>
+    </section>
+
+    <a class="btn btn--primary howto__cta" href="game.html">Start today's run &rarr;</a>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="retro-stripe retro-stripe--thin" aria-hidden="true"></div>
+    <p>OUT OF ORDER &middot; Archive copy. Please return.</p>
+  </footer>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
