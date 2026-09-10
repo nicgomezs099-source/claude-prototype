@@ -109,7 +109,7 @@
     { id: "titanic",              title: "Titanic",                   type: "Movie",  year: 1997, category: "Drama",     themes: [] },
     { id: "the-sopranos",         title: "The Sopranos",              type: "Series", year: 1999, category: "Drama",     themes: [] },
     { id: "gladiator",            title: "Gladiator",                 type: "Movie",  year: 2000, category: "Action",    themes: [] },
-    { id: "shrek",                title: "Shrek",                     type: "Movie",  year: 2001, category: "Animation", themes: [], focus: "center 34%" },
+    { id: "shrek",                title: "Shrek",                     type: "Movie",  year: 2001, category: "Animation", themes: [] },
     { id: "spirited-away",        title: "Spirited Away",             type: "Movie",  year: 2001, category: "Animation", themes: [] },
     { id: "harry-potter",         title: "Harry Potter and the Sorcerer's Stone", type: "Movie", year: 2001, category: "Fantasy", themes: [] },
     { id: "lotr-fellowship",      title: "The Lord of the Rings: Fellowship",      type: "Movie", year: 2001, category: "Fantasy", themes: [] },
