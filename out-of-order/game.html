@@ -81,11 +81,13 @@
       </div>
     </section>
 
-    <!-- round progress -->
+    <!-- time remaining — big and visible; drains as the round's clock runs
+         down and turns red in the last 3 seconds. The exact number is also
+         in the HUD above (Timer), so this bar is decorative for screen readers. -->
     <div class="rprogress">
-      <span class="meta rprogress__label">Round progress</span>
-      <div class="rprogress__track">
-        <div class="rprogress__fill" data-progress-fill style="width:10%"></div>
+      <span class="meta rprogress__label">Time remaining</span>
+      <div class="rprogress__track" aria-hidden="true">
+        <div class="rprogress__fill" data-progress-fill style="width:100%"></div>
       </div>
     </div>
 
@@ -186,6 +188,12 @@
       </ul>
 
       <p class="results__title-award" data-results-award>Casual Viewer</p>
+
+      <!-- shown only when this run's score crossed a collectible's threshold -->
+      <div class="results__unlocked" data-results-unlocked hidden>
+        <p class="meta results__unlocked-label">New in My Archive</p>
+        <div class="results__unlocked-items" data-results-unlocked-items></div>
+      </div>
 
       <div class="tape-artifact" aria-label="Your archive tape">
         <span class="tape-artifact__stripe" aria-hidden="true"></span>

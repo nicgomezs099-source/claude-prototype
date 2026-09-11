@@ -88,19 +88,24 @@
 
     <!-- ---------- THE TIMER ---------- -->
     <section class="howto__panel howto__panel--timer" aria-labelledby="timer-heading">
-      <h2 id="timer-heading" class="section-label">The timer does not end the round</h2>
-      <p>When the timer reaches zero you can <strong>still answer</strong>. You only lose the
-        speed bonus &mdash; the screen shows <strong>&ldquo;No speed bonus&rdquo;</strong>.
-        There is no &ldquo;time's up&rdquo; and no automatic fail. Tension without frustration.</p>
+      <h2 id="timer-heading" class="section-label">The timer never shows a hard fail</h2>
+      <p>A big bar above every challenge counts down and turns red in the last 3 seconds.
+        When it hits zero, the round closes with whatever you'd already chosen (nothing
+        chosen counts as incorrect) and the results pop-up shows up &mdash; no
+        &ldquo;GAME OVER&rdquo;, just the next challenge waiting.</p>
+      <p>The <strong>speed bonus</strong> scales with each round's own clock: answer in the
+        fastest quarter of the time you're given for the full bonus, the next quarter for
+        +75, and so on &mdash; a 30-second Order round and a 15-second Quote round reward
+        &ldquo;fast for this round&rdquo; the same way.</p>
       <table class="mini-table">
-        <caption class="sr-only">Speed bonus by seconds remaining</caption>
-        <thead><tr><th scope="col">Seconds left</th><th scope="col">Speed bonus</th></tr></thead>
+        <caption class="sr-only">Speed bonus by share of the round's time remaining</caption>
+        <thead><tr><th scope="col">Time left</th><th scope="col">Speed bonus</th></tr></thead>
         <tbody>
-          <tr><td>12&ndash;15</td><td>+100</td></tr>
-          <tr><td>8&ndash;11</td><td>+75</td></tr>
-          <tr><td>4&ndash;7</td><td>+50</td></tr>
-          <tr><td>1&ndash;3</td><td>+25</td></tr>
-          <tr><td>0</td><td>No speed bonus</td></tr>
+          <tr><td>75%&ndash;100%</td><td>+100</td></tr>
+          <tr><td>50%&ndash;74%</td><td>+75</td></tr>
+          <tr><td>25%&ndash;49%</td><td>+50</td></tr>
+          <tr><td>1%&ndash;24%</td><td>+25</td></tr>
+          <tr><td>0%</td><td>No speed bonus</td></tr>
         </tbody>
       </table>
     </section>
@@ -127,7 +132,7 @@
 
     <!-- ---------- CHALLENGE TYPES ---------- -->
     <section class="howto__panel" aria-labelledby="types-heading">
-      <h2 id="types-heading" class="section-label">Three kinds of challenge</h2>
+      <h2 id="types-heading" class="section-label">Four kinds of challenge</h2>
       <div class="type-grid">
         <article class="type-card">
           <h3>Order</h3>
@@ -135,12 +140,16 @@
         </article>
         <article class="type-card">
           <h3>Before / After</h3>
-          <p>One reference title, one comparison title. Did it come <strong>before</strong> or
-            <strong>after</strong>?</p>
+          <p>Two titles and one tag &mdash; <strong>BEFORE</strong> or <strong>AFTER</strong>.
+            Drag the tag onto the title it matches, or just click that title.</p>
         </article>
         <article class="type-card">
           <h3>Insert</h3>
           <p>A timeline with a gap. Drop the new title into the slot where it belongs.</p>
+        </article>
+        <article class="type-card">
+          <h3>Quote</h3>
+          <p>A famous line. Pick which Movie or Series it's from, from three options.</p>
         </article>
       </div>
     </section>

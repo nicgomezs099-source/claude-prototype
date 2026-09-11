@@ -71,6 +71,19 @@
 
 
   /* ==========================================================================
+     DATA  —  MY ARCHIVE COLLECTIBLES  (Beta)
+     Score a high enough round to unlock one for good. Only 2 exist in this
+     Beta build; the rest of the 12-slot shelf stays locked "coming soon" —
+     never claim the archive is "complete".
+     ======================================================================== */
+  var COLLECTIBLES = [
+    { id: "neo",  name: "Neo",      hint: "The Matrix", threshold: 600, image: "assets/images/collectibles/neo.png" },
+    { id: "lamp", name: "The Lamp", hint: "Wish granted", threshold: 850, image: "assets/images/collectibles/lamp.png" }
+  ];
+  var ARCHIVE_SLOTS = 12;   // total shelf size the grid always shows
+
+
+  /* ==========================================================================
      DATA  —  ARCHIVE CATEGORIES (decorative shelf on the Home page)
      The shelf shows the whole "archive"; the daily theme is just tonight's tape.
      `ink: true` means the tape colour is light, so its text must be dark.
@@ -91,15 +104,18 @@
 
      // Verify release-year data before final submission.
 
-     `themes`  : which Daily Themes this title belongs to (a title can be in
-                 several).  [] = "archive wildcard" — appears on any day.
+     `themes`  : which editions (Horror / Sci-Fi) this title belongs to. Every
+                 round only pulls from the ACTIVE theme's titles, so a Horror
+                 run never shows a Sci-Fi-only title and vice versa.
      `image`   : card artwork is looked up by id at
                  assets/images/cards/<id>.png  (see cardArtSrc()).
                  Drop a file there and it replaces the CSS fallback.
      `focus`   : optional object-position for cropping to the card window.
      ======================================================================== */
   var CONTENT_ITEMS = [
-    // ---- general / archive wildcards (themes: []) ----
+    // ---- general (themes: []) — not Horror or Sci-Fi, so these sit unused
+    // while the game only has those two editions. Kept for a future 3rd
+    // "general" theme rather than thrown away. ----
     { id: "the-simpsons",         title: "The Simpsons",              type: "Series", year: 1989, category: "Animation", themes: [] },
     { id: "seinfeld",             title: "Seinfeld",                  type: "Series", year: 1989, category: "Sitcom",    themes: [] },
     { id: "the-lion-king",        title: "The Lion King",             type: "Movie",  year: 1994, category: "Animation", themes: [], focus: "28% center" },
@@ -150,6 +166,20 @@
     { id: "the-mandalorian",      title: "The Mandalorian",           type: "Series", year: 2019, category: "Sci-Fi", themes: ["sci-fi"] },
     { id: "everything-everywhere", title: "Everything Everywhere All at Once", type: "Movie", year: 2022, category: "Sci-Fi", themes: ["sci-fi"] },
     { id: "dune",                 title: "Dune",                      type: "Movie",  year: 2021, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "space-odyssey",        title: "2001: A Space Odyssey",     type: "Movie",  year: 1968, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "close-encounters",     title: "Close Encounters of the Third Kind", type: "Movie", year: 1977, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "predator",             title: "Predator",                  type: "Movie",  year: 1987, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "robocop",              title: "RoboCop",                   type: "Movie",  year: 1987, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "total-recall",         title: "Total Recall",              type: "Movie",  year: 1990, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "independence-day",     title: "Independence Day",          type: "Movie",  year: 1996, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "men-in-black",         title: "Men in Black",              type: "Movie",  year: 1997, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "minority-report",      title: "Minority Report",           type: "Movie",  year: 2002, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "war-of-the-worlds",    title: "War of the Worlds",         type: "Movie",  year: 2005, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "district-9",           title: "District 9",                type: "Movie",  year: 2009, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "rick-and-morty",       title: "Rick and Morty",            type: "Series", year: 2013, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "ex-machina",           title: "Ex Machina",                type: "Movie",  year: 2014, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "edge-of-tomorrow",     title: "Edge of Tomorrow",          type: "Movie",  year: 2014, category: "Sci-Fi", themes: ["sci-fi"] },
+    { id: "guardians-galaxy",     title: "Guardians of the Galaxy",   type: "Movie",  year: 2014, category: "Sci-Fi", themes: ["sci-fi"] },
 
     // ---- HORROR ----
     { id: "jaws",                 title: "Jaws",                      type: "Movie",  year: 1975, category: "Horror", themes: ["horror"] },
@@ -168,6 +198,20 @@
     { id: "parasite",             title: "Parasite",                  type: "Movie",  year: 2019, category: "Thriller", themes: ["horror"] },
     { id: "the-walking-dead",     title: "The Walking Dead",          type: "Series", year: 2010, category: "Horror", themes: ["horror"] },
     { id: "american-horror-story", title: "American Horror Story",    type: "Series", year: 2011, category: "Horror", themes: ["horror"] },
+    { id: "the-exorcist",         title: "The Exorcist",              type: "Movie",  year: 1973, category: "Horror", themes: ["horror"] },
+    { id: "carrie",               title: "Carrie",                    type: "Movie",  year: 1976, category: "Horror", themes: ["horror"] },
+    { id: "childs-play",          title: "Child's Play",              type: "Movie",  year: 1988, category: "Horror", themes: ["horror"] },
+    { id: "silence-of-the-lambs", title: "The Silence of the Lambs",  type: "Movie",  year: 1991, category: "Thriller", themes: ["horror"] },
+    { id: "the-ring",             title: "The Ring",                  type: "Movie",  year: 2002, category: "Horror", themes: ["horror"] },
+    { id: "twenty-eight-days-later", title: "28 Days Later",          type: "Movie",  year: 2002, category: "Horror", themes: ["horror"] },
+    { id: "insidious",            title: "Insidious",                 type: "Movie",  year: 2010, category: "Horror", themes: ["horror"] },
+    { id: "the-babadook",         title: "The Babadook",              type: "Movie",  year: 2014, category: "Horror", themes: ["horror"] },
+    { id: "it-follows",           title: "It Follows",                type: "Movie",  year: 2014, category: "Horror", themes: ["horror"] },
+    { id: "midsommar",            title: "Midsommar",                 type: "Movie",  year: 2019, category: "Horror", themes: ["horror"] },
+    { id: "ready-or-not",         title: "Ready or Not",              type: "Movie",  year: 2019, category: "Horror", themes: ["horror"] },
+    { id: "barbarian",            title: "Barbarian",                 type: "Movie",  year: 2022, category: "Horror", themes: ["horror"] },
+    { id: "m3gan",                title: "M3GAN",                     type: "Movie",  year: 2022, category: "Horror", themes: ["horror"] },
+    { id: "smile",                title: "Smile",                     type: "Movie",  year: 2022, category: "Horror", themes: ["horror"] },
 
     // ---- both horror + sci-fi ----
     { id: "stranger-things",      title: "Stranger Things",           type: "Series", year: 2016, category: "Sci-Fi", themes: ["sci-fi", "horror"], focus: "center 62%" },
@@ -489,6 +533,80 @@
   }
 
   /* ==========================================================================
+     STORAGE  —  My Archive collectibles (safe if localStorage is unavailable)
+     A plain { id: true } map — once unlocked, a collectible stays unlocked.
+     ======================================================================== */
+  var COLLECTION_KEY = "outOfOrderCollection";
+
+  function loadCollection() {
+    try {
+      var raw = window.localStorage.getItem(COLLECTION_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function saveCollection(unlocked) {
+    try { window.localStorage.setItem(COLLECTION_KEY, JSON.stringify(unlocked)); }
+    catch (err) { /* ignore — nothing to persist to */ }
+  }
+
+  /* Compare a just-finished run's score against every collectible's
+     threshold; unlock (and persist) any new ones; return the list earned
+     just now so Results can show "New in My Archive". */
+  function checkCollectibleUnlocks(score) {
+    var unlocked = loadCollection();
+    var justUnlocked = [];
+    COLLECTIBLES.forEach(function (c) {
+      if (!unlocked[c.id] && score >= c.threshold) {
+        unlocked[c.id] = true;
+        justUnlocked.push(c);
+      }
+    });
+    if (justUnlocked.length) saveCollection(unlocked);
+    return justUnlocked;
+  }
+
+  /* Render the 12-slot "My Archive" shelf on the Home page: the 2 real
+     collectibles (locked/unlocked) plus locked "coming soon" placeholders
+     filling the rest. Never says the archive is complete — this is a Beta
+     with only 2 items to find. */
+  function renderCollectionGrid() {
+    var grid = $("[data-collection-grid]");
+    if (!grid) return;
+
+    var unlocked = loadCollection();
+    var html = "";
+    var foundCount = 0;
+
+    COLLECTIBLES.forEach(function (c) {
+      var got = !!unlocked[c.id];
+      if (got) foundCount += 1;
+      html += got
+        ? '<div class="collection-slot collection-slot--unlocked">' +
+            '<img class="collection-slot__img" src="' + c.image + '" alt="' + c.name + '">' +
+            '<span class="collection-slot__label">' + c.name + '</span>' +
+          '</div>'
+        : '<div class="collection-slot collection-slot--locked">' +
+            '<span class="collection-slot__mark" aria-hidden="true">?</span>' +
+            '<span class="collection-slot__label">Coming soon</span>' +
+          '</div>';
+    });
+    for (var i = COLLECTIBLES.length; i < ARCHIVE_SLOTS; i++) {
+      html +=
+        '<div class="collection-slot collection-slot--locked">' +
+          '<span class="collection-slot__mark" aria-hidden="true">?</span>' +
+          '<span class="collection-slot__label">Coming soon</span>' +
+        '</div>';
+    }
+    grid.innerHTML = html;
+
+    text("[data-collection-status]",
+      foundCount + " Beta item" + (foundCount === 1 ? "" : "s") + " found — more coming soon.");
+  }
+
+  /* ==========================================================================
      DAILY SPOTLIGHT  —  "Memory of the Day"  (from the shared engine)
      One title, rotated by the day number, with an MMDD archive id. No server.
      ======================================================================== */
@@ -568,18 +686,20 @@
   }
 
   /* Round SHAPE: which challenge type, timer, size.
-     4 ORDER · 2 BEFORE/AFTER · 2 INSERT · 2 QUOTE  (chronological stays 8/10). */
+     4 ORDER · 2 BEFORE/AFTER · 2 INSERT · 2 QUOTE  (chronological stays 8/10).
+     Seconds scale with how much reading/deciding the round actually needs —
+     a 5-card ORDER round gets more time than a 2-title BEFORE/AFTER. */
   var ROUND_PLAN = [
-    { type: "order",        seconds: 12, cards: 3 },
-    { type: "order",        seconds: 13, cards: 3 },
-    { type: "quote",        seconds: 12 },
-    { type: "before-after", seconds: 11 },
-    { type: "insert",       seconds: 12, line: 3 },
-    { type: "order",        seconds: 11, cards: 4 },
-    { type: "quote",        seconds: 11 },
-    { type: "insert",       seconds: 10, line: 4 },
-    { type: "order",        seconds: 10, cards: 5 },
-    { type: "before-after", seconds: 9 }
+    { type: "order",        seconds: 20, cards: 3 },
+    { type: "order",        seconds: 20, cards: 3 },
+    { type: "quote",        seconds: 15 },
+    { type: "before-after", seconds: 15 },
+    { type: "insert",       seconds: 15, line: 3 },
+    { type: "order",        seconds: 25, cards: 4 },
+    { type: "quote",        seconds: 15 },
+    { type: "insert",       seconds: 15, line: 4 },
+    { type: "order",        seconds: 30, cards: 5 },
+    { type: "before-after", seconds: 15 }
   ];
 
   /* seeded array shuffle */
@@ -607,62 +727,54 @@
   }
 
   /* ---- Daily Theme content ------------------------------------------------
-     getThemeChallengePool() = every title tagged with the theme.
-     A "wildcard" round pulls from titles OUTSIDE the theme instead — the
-     70 / 30 mix (7 themed rounds, 3 wildcards) keeps the theme meaningful
-     without punishing a player who is weak in one genre.                     */
+     getThemeChallengePool() = every title tagged with the active theme.
+     Every round draws ONLY from this pool — a Horror run never shows a
+     Sci-Fi-only title, and vice versa, so the theme actually means
+     something. Both pools are large enough (35+ titles) that a single
+     10-round run never has to repeat a title.                                */
   function getThemeChallengePool(themeId) {
     return CONTENT_ITEMS.filter(function (it) { return it.themes.indexOf(themeId) !== -1; });
   }
 
-  /* pick 3 round numbers (from rounds 2-10) to be "archive wildcards" */
-  function selectWildcardRounds(rng) {
-    var picks = shuffleArr([2, 3, 4, 5, 6, 7, 8, 9, 10], rng).slice(0, 3);
-    var map = {};
-    picks.forEach(function (n) { map[n] = true; });
-    return map;
-  }
-
   /* ---- generateDailyRun() ----------------------------------------------
-     Same round SHAPE for everyone every day; the DATE seeds which titles
-     fill each round and which 3 rounds are wildcards.                        */
+     Same round SHAPE for everyone every day; the DATE + the active theme
+     seed which titles fill each round. Horror and Sci-Fi draw from
+     different pools, so the two editions never play the same 10 rounds.      */
   function generateDailyRun(date) {
-    var rng = mulberry32(dayNumber(date) * 2654435761);
     var themeId = getDailyTheme(date).id;
-    var wildRounds = selectWildcardRounds(rng);
+    var rng = mulberry32(dayNumber(date) * 2654435761 + stringSeed(themeId));
 
-    // two pools that never overlap: themed titles vs everything else
-    var themedItems = shuffleArr(getThemeChallengePool(themeId), rng);
-    var otherItems  = shuffleArr(CONTENT_ITEMS.filter(function (it) { return it.themes.indexOf(themeId) === -1; }), rng);
-    var themedQ     = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; }), rng);
-    var otherQ      = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) === -1; }), rng);
-    var ti = 0, oi = 0, tq = 0, oq = 0;
+    var pool  = shuffleArr(getThemeChallengePool(themeId), rng);
+    var qPool = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; }), rng);
+    var pi = 0, qi = 0;
 
-    function nextItem(wild) {
-      if (wild) return oi < otherItems.length ? otherItems[oi++] : themedItems[ti++];
-      return ti < themedItems.length ? themedItems[ti++] : otherItems[oi++];
+    function nextItem() {
+      if (pi >= pool.length) pi = 0;   // safety net — the pools are sized not to need this
+      return pool[pi++];
     }
-    function takeItems(n, wild) {
+    function takeItems(n) {
       var out = [];
-      for (var i = 0; i < n; i++) { var it = nextItem(wild); if (it) out.push(it); }
+      for (var i = 0; i < n; i++) { var it = nextItem(); if (it) out.push(it); }
       return out;
     }
-    function nextQuote(wild) {
-      if (wild) return oq < otherQ.length ? otherQ[oq++] : themedQ[tq++];
-      return tq < themedQ.length ? themedQ[tq++] : otherQ[oq++];
+    function nextQuote() {
+      if (qi >= qPool.length) qi = 0;
+      return qPool[qi++];
     }
 
-    var rounds = ROUND_PLAN.map(function (plan, idx) {
-      var wild = !!wildRounds[idx + 1];
+    return ROUND_PLAN.map(function (plan) {
       var extra;
 
       if (plan.type === "quote") {
-        extra = { type: "quote", quote: nextQuote(wild) || QUOTE_CHALLENGES[0] };
+        extra = { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
       } else if (plan.type === "before-after") {
-        var pair = pickBeforeAfterPair(takeItems(3, wild), rng);
-        extra = { type: "before-after", reference: pair[0], comparison: pair[1] };
+        var pair = pickBeforeAfterPair(takeItems(3), rng);
+        extra = {
+          type: "before-after", itemA: pair[0], itemB: pair[1],
+          label: rng() < 0.5 ? "before" : "after"
+        };
       } else if (plan.type === "insert") {
-        var set = takeItems(plan.line + 1, wild).slice().sort(function (a, b) { return a.year - b.year; });
+        var set = takeItems(plan.line + 1).slice().sort(function (a, b) { return a.year - b.year; });
         var k = 1 + Math.floor(rng() * Math.max(1, set.length - 2));
         var card = set[k];
         var line = set.filter(function (it) { return it !== card; });
@@ -671,23 +783,13 @@
           correctSlot: line.filter(function (it) { return it.year < card.year; }).length
         };
       } else {
-        extra = { type: "order", items: presentOrder(takeItems(plan.cards, wild)) };
+        extra = { type: "order", items: presentOrder(takeItems(plan.cards)) };
       }
 
       extra.seconds = plan.seconds;
-      extra.wildcard = wild;
       extra.theme = themeId;
       return extra;
     });
-
-    // Round 1 = the ORDER teaching round (always on-theme, never a wildcard)
-    var teaching = [itemById("the-lion-king"), itemById("shrek"), itemById("stranger-things")];
-    if (teaching[0] && teaching[1] && teaching[2]) {
-      rounds[0].items = presentOrder(teaching);
-      rounds[0].wildcard = false;
-    }
-
-    return rounds;
   }
 
 
@@ -789,7 +891,6 @@
 
     var nn = ("0" + gameState.round).slice(-2);
     var tag = (round.type === "quote" ? "Quote Archive" : "Today's Archive") + " · Round " + nn;
-    if (round.wildcard) tag += "  ·  Archive Wildcard";
     text("[data-challenge-tag]", tag);
 
     if (round.type === "order") renderOrder(round, body);
@@ -803,9 +904,7 @@
     text("[data-hud-score]", gameState.score.toLocaleString());
     text("[data-hud-streak]", "×" + gameState.streak);
     text("[data-hud-heat]", HEAT_LABEL[gameState.heat]);
-    var fill = $("[data-progress-fill]");
-    if (fill) fill.style.width = (gameState.round / 10 * 100) + "%";
-    updateTimerDisplay();
+    updateTimerDisplay();   // also draws the time-remaining bar (below)
   }
 
   function text(selector, value) {
@@ -973,69 +1072,94 @@
 
   /* ==========================================================================
      MECHANIC 02  —  BEFORE / AFTER
-     "Did the comparison title come BEFORE or AFTER the reference title?"
+     One tag — "BEFORE" or "AFTER" (which one shows is randomised per round) —
+     and two titles. The player drags the tag onto whichever title matches it
+     (or just clicks/taps the title — the drag is a bonus, not a requirement).
      ======================================================================== */
 
   function renderBeforeAfter(round, body) {
+    var tagText = round.label === "before" ? "BEFORE" : "AFTER";
     text("[data-challenge-instruction]", "Before or After?");
     text("[data-submit]", "Lock answer ✓");
     text("[data-challenge-count]", "2 Titles");
     text("[data-challenge-help]",
-      "Did " + round.comparison.title + " come before or after " +
-      round.reference.title + "?  ·  ← / → keys");
+      "Which title came out " + (round.label === "before" ? "earlier" : "later") +
+      "? Drag " + tagText + " onto it, or just click it.");
 
     body.innerHTML =
-      '<div class="ba__row">' +
-        baCard(round.reference, "Reference", false) +
-        '<div class="ba__vs"><span class="meta">Did it come…</span>' +
-          '<span class="ba__q" aria-hidden="true">?</span></div>' +
-        baCard(round.comparison, "Comparison", true) +
+      '<div class="ba__tag-row" aria-hidden="true">' +
+        '<span class="ba__tag" data-ba-tag draggable="true">' + tagText + '</span>' +
       '</div>' +
-      '<div class="ba__choices">' +
-        '<button type="button" class="ba__btn" data-ba="before" aria-pressed="false">' +
-          '<span aria-hidden="true">←</span> Before</button>' +
-        '<button type="button" class="ba__btn" data-ba="after" aria-pressed="false">' +
-          'After <span aria-hidden="true">→</span></button>' +
+      '<div class="ba__row">' +
+        baCard(round.itemA) +
+        baCard(round.itemB) +
       '</div>';
 
-    loadPosterImage($('[data-ba-card="' + round.reference.id + '"] .poster', body), cardArtSrc(round.reference), round.reference.focus);
-    loadPosterImage($('[data-ba-card="' + round.comparison.id + '"] .poster', body), cardArtSrc(round.comparison), round.comparison.focus);
+    loadPosterImage($('[data-ba-card="' + round.itemA.id + '"] .poster', body), cardArtSrc(round.itemA), round.itemA.focus);
+    loadPosterImage($('[data-ba-card="' + round.itemB.id + '"] .poster', body), cardArtSrc(round.itemB), round.itemB.focus);
 
-    $all("[data-ba]", body).forEach(function (btn) {
-      btn.addEventListener("click", function () { setBaChoice(btn.getAttribute("data-ba")); });
+    $all("[data-ba-card]", body).forEach(function (btn) {
+      var id = btn.getAttribute("data-ba-card");
+      btn.addEventListener("click", function () { setBaChoice(id); });
+      btn.addEventListener("dragover", function (e) { e.preventDefault(); btn.classList.add("ba-card--dragover"); });
+      btn.addEventListener("dragleave", function () { btn.classList.remove("ba-card--dragover"); });
+      btn.addEventListener("drop", function (e) {
+        e.preventDefault();
+        btn.classList.remove("ba-card--dragover");
+        setBaChoice(id);
+      });
     });
+
+    var tag = $("[data-ba-tag]", body);
+    if (tag) {
+      tag.addEventListener("dragstart", function (e) {
+        if (answered || counting) { e.preventDefault(); return; }
+        e.dataTransfer.effectAllowed = "move";
+        try { e.dataTransfer.setData("text/plain", tagText); } catch (x) {}
+      });
+    }
 
     $("[data-submit]").disabled = true;   // enabled once a choice is made
   }
 
-  function baCard(item, tag, highlight) {
-    return '<div class="ba-card' + (highlight ? " ba-card--hi" : "") + '" data-ba-card="' + item.id + '"' +
-             ' style="--card-color:' + genreColor(item.category) + '">' +
-             '<span class="meta ba-card__tag">' + tag + '</span>' +
-             '<div class="ba-card__art poster" data-card-art>' + posterInner(item) + '</div>' +
+  /* a title card that doubles as a drop target for the BEFORE/AFTER tag */
+  function baCard(item) {
+    return '<button type="button" class="ba-card" data-ba-card="' + item.id + '"' +
+             ' style="--card-color:' + genreColor(item.category) + '" aria-pressed="false">' +
+             '<div class="ba-card__art poster" data-card-art>' + posterInner(item) +
+               '<span class="ba-card__mark" data-ba-mark aria-hidden="true"></span>' +
+             '</div>' +
              '<p class="ba-card__title">' + item.title + '</p>' +
              '<p class="meta ba-card__cat">' + item.category + '</p>' +
              yearTag(item) +
-           '</div>';
+           '</button>';
   }
 
-  function setBaChoice(choice) {
+  function setBaChoice(id) {
     if (answered || counting) return;
-    baChoice = choice;
-    $all("[data-ba]").forEach(function (btn) {
-      var on = btn.getAttribute("data-ba") === choice;
+    baChoice = id;
+    $all("[data-ba-card]").forEach(function (btn) {
+      var on = btn.getAttribute("data-ba-card") === id;
       btn.setAttribute("aria-pressed", String(on));
-      btn.classList.toggle("ba__btn--on", on);
+      btn.classList.toggle("ba-card--on", on);
     });
     $("[data-submit]").disabled = false;
-    announce(choice === "before" ? "Before selected." : "After selected.");
+    announce(itemById(id).title + " selected.");
+  }
+
+  /* the earlier / later title for the round's pair (ties broken consistently) */
+  function baOrder(round) {
+    var earlier = round.itemA.year <= round.itemB.year ? round.itemA : round.itemB;
+    var later   = round.itemA.year <= round.itemB.year ? round.itemB : round.itemA;
+    return { earlier: earlier, later: later };
   }
 
   function checkBeforeAfterAnswer() {
     var round = currentRound();
     if (!baChoice) return false;
-    var want = round.comparison.year < round.reference.year ? "before" : "after";
-    return baChoice === want;
+    var order = baOrder(round);
+    var wantId = round.label === "before" ? order.earlier.id : order.later.id;
+    return baChoice === wantId;
   }
 
 
@@ -1216,14 +1340,29 @@
     text("[data-hud-speed]", bonus > 0 ? "+" + bonus : "No bonus");
     var challenge = $("[data-challenge]");
     if (challenge) challenge.classList.toggle("challenge--no-bonus", t === 0);
+
+    // big time-remaining bar: drains from full to empty, turns red at ≤3s
+    var round = currentRound();
+    var fill = $("[data-progress-fill]");
+    if (fill && round) {
+      var pct = round.seconds > 0 ? Math.max(0, (t / round.seconds) * 100) : 0;
+      fill.style.width = pct + "%";
+      fill.classList.toggle("rprogress__fill--danger", t <= 3);
+    }
   }
 
-  /* ---- calculateSpeedBonus() -------------------------------------------- */
+  /* ---- calculateSpeedBonus() --------------------------------------------
+     Rounds now run anywhere from 15 to 30 seconds, so the bonus is based on
+     the SHARE of the round's own clock left, not a fixed number of seconds —
+     answering in the fastest quarter of a 30s round pays the same as
+     answering in the fastest quarter of a 15s round.                        */
   function calculateSpeedBonus(secondsLeft) {
-    if (secondsLeft >= 12) return 100;
-    if (secondsLeft >= 8)  return 75;
-    if (secondsLeft >= 4)  return 50;
-    if (secondsLeft >= 1)  return 25;
+    var total = currentRound().seconds;
+    var share = total > 0 ? secondsLeft / total : 0;
+    if (share >= 0.75) return 100;
+    if (share >= 0.5)  return 75;
+    if (share >= 0.25) return 50;
+    if (share > 0)     return 25;
     return 0;
   }
 
@@ -1279,7 +1418,7 @@
       text("[data-challenge-help]", "Reveal: pick one card to show its release year.");
       announce("Pick a card to reveal its release year.");
     } else if (round.type === "before-after") {
-      spendReveal(round.comparison.id);
+      spendReveal(round.itemB.id);
     } else if (round.type === "insert") {
       spendReveal(round.card.id);
     } else if (round.type === "quote") {
@@ -1526,14 +1665,19 @@
     return sorted;
   }
 
-  /* mark the correct BEFORE/AFTER button; return both titles in year order */
+  /* mark the correct BEFORE/AFTER card (outline + ✓/✕, never colour alone);
+     return both titles in year order */
   function revealBeforeAfter(round) {
-    var want = round.comparison.year < round.reference.year ? "before" : "after";
-    $all("[data-ba]").forEach(function (btn) {
-      var k = btn.getAttribute("data-ba");
-      btn.classList.add(k === want ? "ba__btn--right" : "ba__btn--wrong");
+    var order = baOrder(round);
+    var wantId = round.label === "before" ? order.earlier.id : order.later.id;
+    $all("[data-ba-card]").forEach(function (btn) {
+      var id = btn.getAttribute("data-ba-card");
+      var right = id === wantId;
+      btn.classList.add(right ? "ba-card--right" : "ba-card--wrong");
+      var mark = $("[data-ba-mark]", btn);
+      if (mark) mark.textContent = right ? "✓" : "✕";
     });
-    return [round.reference, round.comparison].sort(function (a, b) { return a.year - b.year; });
+    return [order.earlier, order.later];
   }
 
   /* highlight the correct INSERT slot; return the full sorted timeline */
@@ -1595,6 +1739,25 @@
     var badge = $("[data-new-best]");
     if (badge) badge.hidden = !isNewBest;
 
+    // My Archive: did this run's score cross a collectible's threshold?
+    var justUnlocked = checkCollectibleUnlocks(gameState.score);
+    var unlockedBox = $("[data-results-unlocked]");
+    if (unlockedBox) {
+      unlockedBox.hidden = justUnlocked.length === 0;
+      var itemsEl = $("[data-results-unlocked-items]");
+      if (itemsEl) {
+        itemsEl.innerHTML = justUnlocked.map(function (c) {
+          return '<div class="unlocked-item">' +
+            '<img class="unlocked-item__img" src="' + c.image + '" alt="">' +
+            '<span class="unlocked-item__name">' + c.name + '</span>' +
+          '</div>';
+        }).join("");
+      }
+      if (justUnlocked.length) {
+        announce("New in My Archive: " + justUnlocked.map(function (c) { return c.name; }).join(", ") + ".");
+      }
+    }
+
     var results = $("[data-results]");
     results.hidden = false;
     results.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
@@ -1643,15 +1806,13 @@
       }
     });
 
-    // keyboard shortcuts: arrows for BEFORE/AFTER, 1-3 for QUOTE
+    // keyboard shortcut: 1 / 2 / 3 for QUOTE options (BEFORE/AFTER and INSERT
+    // are answered by Tab-ing to a card/slot and pressing Enter or Space)
     document.addEventListener("keydown", function (e) {
       if (answered || counting) return;
-      var t = currentRound().type;
-      if (t === "before-after") {
-        if (e.key === "ArrowLeft") { e.preventDefault(); setBaChoice("before"); }
-        if (e.key === "ArrowRight") { e.preventDefault(); setBaChoice("after"); }
-      } else if (t === "quote") {
-        if (e.key === "1" || e.key === "2" || e.key === "3") { e.preventDefault(); quoteKey(parseInt(e.key, 10)); }
+      if (currentRound().type === "quote" && (e.key === "1" || e.key === "2" || e.key === "3")) {
+        e.preventDefault();
+        quoteKey(parseInt(e.key, 10));
       }
     });
     on("[data-double-down]", "click", toggleDoubleDown);
@@ -1682,6 +1843,7 @@
       renderShelf(today);        // build the shelf first...
       renderSpotlight();
       renderPersonalBest();
+      renderCollectionGrid();
     }
 
     applyTheme(theme, today);     // ...then apply the theme so it can mark the active spine

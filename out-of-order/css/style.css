@@ -784,6 +784,36 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 /* archive / shelf block */
 .home__archive-shelf { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 
+/* ---- My Archive : Beta collectibles shelf ----
+   A 12-slot grid. Only 2 slots can ever hold something in this Beta; the
+   rest are always locked "coming soon" placeholders — never a complete set. */
+.archive-collection { margin-top: var(--space-2); }
+.archive-collection__status { color: rgba(20, 20, 20, 0.7); font-size: 0.9rem; margin-bottom: var(--space-2); }
+.archive-collection__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+.collection-slot {
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--color-ink);
+  border-radius: 8px;
+  background: var(--color-label);
+}
+.collection-slot--locked {
+  background: repeating-linear-gradient(135deg, rgba(20, 20, 20, 0.05) 0 8px, rgba(20, 20, 20, 0.1) 8px 16px);
+  color: rgba(20, 20, 20, 0.4);
+}
+.collection-slot--unlocked { border: var(--border-ink); border-color: var(--theme-primary); }
+.collection-slot__mark { font-family: var(--font-display); font-size: 1.4rem; }
+.collection-slot__img { max-width: 80%; max-height: 65%; object-fit: contain; }
+.collection-slot__label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
 /* Memory of the Day — small archive note under the VHS case */
 .memory {
   display: flex;
@@ -859,17 +889,31 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .hud__value--score { font-family: var(--font-display); font-size: 1.2rem; color: var(--theme-primary); }
 .hud__heat { text-transform: uppercase; letter-spacing: 0.04em; }
 
-/* ---- round progress ---- */
-.rprogress { display: grid; gap: 4px; }
-.rprogress__label { font-size: 0.62rem; color: rgba(20, 20, 20, 0.6); }
+/* ---- time remaining bar ----
+   Repurposed from a thin "round progress" strip into a big, hard-to-miss
+   clock: it drains from full to empty over the round's own timer, and
+   turns red in the last 3 seconds as a last call to answer. */
+.rprogress { display: grid; gap: 6px; margin-bottom: var(--space-1); }
+.rprogress__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.7);
+}
 .rprogress__track {
-  height: 8px;
-  background: rgba(20, 20, 20, 0.12);
-  border: 1px solid var(--color-ink);
+  height: 22px;
+  background: rgba(20, 20, 20, 0.1);
+  border: var(--border-ink);
   border-radius: var(--radius-pill);
   overflow: hidden;
 }
-.rprogress__fill { height: 100%; background: var(--theme-secondary); transition: width 250ms ease; }
+.rprogress__fill {
+  height: 100%;
+  background: var(--theme-secondary);
+  transition: width 1s linear, background-color 200ms ease;
+}
+.rprogress__fill--danger { background: var(--color-coral); }
 
 /* ---- challenge panel : the visual focus ---- */
 .challenge {
@@ -1095,20 +1139,40 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .order-list--revealing .order-card { cursor: pointer; outline: 2px dashed var(--color-cyan); outline-offset: 2px; }
 
 
-/* ---- MECHANIC 02 : BEFORE / AFTER ---- */
+/* ---- MECHANIC 02 : BEFORE / AFTER ----
+   A single draggable tag (BEFORE or AFTER, chosen per round) sits above two
+   title cards. Drag the tag onto a card, or just click/tap the card — both
+   do the same thing. */
+.ba__tag-row { display: flex; justify-content: center; margin-bottom: var(--space-2); }
+.ba__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.4rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  color: var(--color-bg);
+  background: var(--color-ink);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-hard);
+  cursor: grab;
+}
+.ba__tag:active { cursor: grabbing; }
+
 .ba__row {
   display: grid;
   gap: var(--space-2);
-  align-items: center;
-  grid-template-columns: 1fr;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
-.ba__vs { text-align: center; }
-.ba__vs .meta { color: rgba(20, 20, 20, 0.5); }
-.ba__q { display: block; font-family: var(--font-display); font-size: 2rem; line-height: 1; }
 
 .ba-card {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  text-align: left;
+  font: inherit;
   background: #fbf6e9;
   border: var(--border-ink);
   border-top: 10px solid var(--card-color, var(--color-coral));
@@ -1116,10 +1180,11 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   box-shadow: var(--shadow-card);
   padding: var(--space-2);
   overflow: hidden;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
-.ba-card--hi { background: #fff; }
-.ba-card__tag { color: rgba(20, 20, 20, 0.45); }
-.ba-card--hi .ba-card__tag { color: var(--theme-primary); }
+.ba-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
+.ba-card:disabled { cursor: not-allowed; }
 .ba-card__art {
   margin: 0.5rem 0;
   aspect-ratio: 16 / 9;
@@ -1133,34 +1198,33 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .ba-card__title { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.05; }
 .ba-card__cat { color: rgba(20, 20, 20, 0.55); margin-top: 0.25rem; }
 
-.ba__choices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-.ba__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 64px;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  text-transform: uppercase;
-  color: var(--color-ink);
+/* ✓ / ✕ mark, revealed alongside the outline so correctness is never
+   colour-only */
+.ba-card__mark {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 4;
+  display: none;
+  width: 1.7rem; height: 1.7rem;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
   background: var(--color-label);
-  border: var(--border-ink);
-  border-radius: 10px;
-  box-shadow: var(--shadow-hard);
-  cursor: pointer;
-  transition: transform 150ms ease;
 }
-.ba__btn:hover:not(:disabled) { transform: translate(-1px, -1px); }
-.ba__btn:disabled { cursor: not-allowed; }
-.ba__btn--on { background: var(--color-ink); color: var(--color-bg); }
-.ba__btn--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
-.ba__btn--wrong.ba__btn--on { background: var(--color-coral); color: #fff; }
+.ba-card--right .ba-card__mark,
+.ba-card--wrong .ba-card__mark { display: grid; }
+.ba-card--right .ba-card__mark { background: var(--color-teal); color: #fff; }
+.ba-card--wrong .ba-card__mark { background: var(--color-coral); color: #fff; }
+
+/* drag-hover target + chosen / right / wrong states (icon+text+outline —
+   never colour alone) */
+.ba-card--dragover { outline: 3px dashed var(--theme-primary); outline-offset: 2px; }
+.ba-card--on { background: var(--color-ink); color: var(--color-bg); }
+.ba-card--on .ba-card__cat { color: rgba(247, 239, 221, 0.7); }
+.ba-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.ba-card--wrong.ba-card--on { background: var(--color-coral); color: #fff; }
+.ba-card--wrong.ba-card--on .ba-card__cat { color: rgba(255, 255, 255, 0.8); }
 
 
 /* ---- MECHANIC 03 : INSERT ---- */
@@ -1572,6 +1636,21 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .results__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; margin-top: var(--space-3); }
 .results__copied { margin-top: var(--space-2); color: var(--color-teal); font-weight: 600; }
 
+/* shown only when a run's score just crossed a collectible's threshold */
+.results__unlocked {
+  margin: var(--space-2) auto 0;
+  max-width: 300px;
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  background: rgba(247, 239, 221, 0.9);
+  padding: var(--space-2);
+}
+.results__unlocked-label { color: var(--theme-primary); margin-bottom: 0.3rem; }
+.results__unlocked-items { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; }
+.unlocked-item { display: grid; place-items: center; gap: 2px; width: 90px; }
+.unlocked-item__img { max-width: 80%; max-height: 70px; object-fit: contain; }
+.unlocked-item__name { font-size: 0.75rem; font-weight: 700; }
+
 /* VHS tape "collectible" on the results screen */
 .tape-artifact {
   position: relative;
@@ -1695,9 +1774,8 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
    ========================================================================== */
 @media (min-width: 768px) {
   .steps { grid-template-columns: repeat(2, 1fr); }
-  .type-grid { grid-template-columns: repeat(3, 1fr); }
+  .type-grid { grid-template-columns: repeat(2, 1fr); }
   .site-nav__brand { font-size: 1.5rem; }
-  .ba__row { grid-template-columns: 1fr auto 1fr; }
 }
 
 @media (min-width: 1024px) {
