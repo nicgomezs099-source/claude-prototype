@@ -705,7 +705,7 @@
 
     $("[data-feedback]").hidden = true;
     $("[data-challenge]").hidden = false;
-    $("[data-challenge]").classList.remove("challenge--no-bonus", "challenge--wrong");
+    $("[data-challenge]").classList.remove("challenge--no-bonus");
 
     renderHud();
     renderChallenge(round);
@@ -1181,7 +1181,10 @@
 
 
   /* ==========================================================================
-     TIMER  (soft — running out only costs the Speed Bonus)
+     TIMER
+     Counting down never shows a harsh "GAME OVER". But when it reaches 0 the
+     round DOES close: whatever the player has picked so far is locked in
+     (nothing picked = an incorrect round) and the feedback pop-up appears.
      ======================================================================== */
 
   function startTimer() {
@@ -1192,7 +1195,8 @@
         gameState.timeRemaining--;
         updateTimerDisplay();
       } else {
-        stopTimer();   // 0 reached — no bonus, but the round does NOT end
+        stopTimer();
+        lockAnswer(true);   // time's up — end the round with what we have
       }
     }, 1000);
   }
@@ -1384,8 +1388,11 @@
     document.body.classList.add("heat-" + gameState.heat);
   }
 
-  function lockAnswer() {
-    if (answered || counting || !canLock()) return;
+  function lockAnswer(force) {
+    // `force` is true only when the timer runs out. A normal click needs a
+    // valid choice first (canLock); a time-out locks in whatever is there.
+    if (answered || counting) return;
+    if (!force && !canLock()) return;
     answered = true;
     revealing = false;
     stopTimer();
@@ -1435,17 +1442,19 @@
     else if (round.type === "insert") correctSequence = revealInsert(round);
     else correctSequence = revealQuote(round);
 
-    // a wrong answer gets a brief VHS-tracking wobble
-    if (!isCorrect) {
-      var challenge = $("[data-challenge]");
-      challenge.classList.add("challenge--wrong");
-      window.setTimeout(function () { challenge.classList.remove("challenge--wrong"); }, 500);
-    }
-
-    // the shared archive verification strip
+    // the shared archive verification pop-up
     var fb = $("[data-feedback]");
     fb.className = "feedback " + (isCorrect ? "feedback--correct" : "feedback--incorrect");
     fb.hidden = false;
+
+    // a wrong answer gives the pop-up a brief VHS-tracking wobble
+    if (!isCorrect) {
+      var box = $(".feedback__box", fb);
+      if (box) {
+        box.classList.add("feedback__box--wrong");
+        window.setTimeout(function () { box.classList.remove("feedback__box--wrong"); }, 500);
+      }
+    }
     text("[data-feedback-mark]", isCorrect ? "✓" : "✕");
     text("[data-feedback-title]", isCorrect ? FEEDBACK_TITLE[round.type] : FEEDBACK_TITLE_WRONG[round.type]);
     text("[data-feedback-stamp]", isCorrect ? "Archive verified" : "Please rewind");
@@ -1469,7 +1478,9 @@
     announce((isCorrect ? "Correct. " : "Out of order. ") +
       "Round score " + roundScore + ". Streak " + gameState.streak + ".");
 
-    fb.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "nearest" });
+    // move focus into the pop-up so keyboard players land on "Next challenge"
+    var next = $("[data-next]");
+    if (next) next.focus();
   }
 
   var FEEDBACK_TITLE = {
@@ -1616,8 +1627,17 @@
      WIRING  —  connect the fixed buttons once
      ======================================================================== */
   function wireGameControls() {
-    on("[data-submit]", "click", lockAnswer);
+    on("[data-submit]", "click", function () { lockAnswer(false); });
     on("[data-next]", "click", goToNextRound);
+
+    // the feedback pop-up: Escape also advances to the next challenge
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !$("[data-feedback]").hidden) {
+        e.preventDefault();
+        goToNextRound();
+      }
+    });
+
     // keyboard shortcuts: arrows for BEFORE/AFTER, 1-3 for QUOTE
     document.addEventListener("keydown", function (e) {
       if (answered || counting) return;

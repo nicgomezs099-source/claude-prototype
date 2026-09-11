@@ -140,28 +140,33 @@
     </p>
 
     <!-- ============================================================
-         FEEDBACK  —  archive verification strip (hidden by default)
+         FEEDBACK  —  results pop-up, shown after every answer or a time-out
+         (hidden by default; the dimmed backdrop blocks the page until the
+         player clicks "Next challenge")
          ============================================================ -->
-    <section class="feedback" data-feedback hidden aria-labelledby="feedback-heading">
-      <div class="feedback__strip">
-        <span class="feedback__mark" aria-hidden="true" data-feedback-mark>&check;</span>
-        <h2 id="feedback-heading" class="feedback__title" data-feedback-title>Timeline locked</h2>
-        <span class="feedback__stamp" data-feedback-stamp>Archive verified</span>
+    <section class="feedback" data-feedback hidden
+             role="alertdialog" aria-modal="true" aria-labelledby="feedback-heading">
+      <div class="feedback__box">
+        <div class="feedback__strip">
+          <span class="feedback__mark" aria-hidden="true" data-feedback-mark>&check;</span>
+          <h2 id="feedback-heading" class="feedback__title" data-feedback-title>Timeline locked</h2>
+          <span class="feedback__stamp" data-feedback-stamp>Archive verified</span>
+        </div>
+
+        <ol class="feedback__timeline" data-feedback-timeline></ol>
+
+        <table class="breakdown">
+          <tbody>
+            <tr><th scope="row">Base</th><td data-bd-base>+100</td></tr>
+            <tr><th scope="row">Speed</th><td data-bd-speed>+75</td></tr>
+            <tr data-bd-dd-row hidden><th scope="row">Double Down</th><td>&times;2</td></tr>
+            <tr class="breakdown__total"><th scope="row">Round score</th><td data-bd-total>+175</td></tr>
+          </tbody>
+        </table>
+
+        <p class="feedback__streak" data-feedback-streak>Streak &times;1</p>
+        <button type="button" class="btn btn--lock" data-next>Next challenge &rarr;</button>
       </div>
-
-      <ol class="feedback__timeline" data-feedback-timeline></ol>
-
-      <table class="breakdown">
-        <tbody>
-          <tr><th scope="row">Base</th><td data-bd-base>+100</td></tr>
-          <tr><th scope="row">Speed</th><td data-bd-speed>+75</td></tr>
-          <tr data-bd-dd-row hidden><th scope="row">Double Down</th><td>&times;2</td></tr>
-          <tr class="breakdown__total"><th scope="row">Round score</th><td data-bd-total>+175</td></tr>
-        </tbody>
-      </table>
-
-      <p class="feedback__streak" data-feedback-streak>Streak &times;1</p>
-      <button type="button" class="btn btn--lock" data-next>Next challenge &rarr;</button>
     </section>
 
     <!-- polite live region: feedback, score changes, power-up unlocks -->

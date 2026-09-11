@@ -1409,8 +1409,7 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 }
 .challenge__exit a:hover { color: var(--color-ink); border-bottom-color: var(--color-ink); }
 
-/* brief VHS-tracking wobble on a wrong answer */
-.challenge--wrong { animation: vhs-tracking 450ms steps(2, end) 2; }
+/* brief VHS-tracking wobble, used on the feedback pop-up after a wrong answer */
 @keyframes vhs-tracking {
   0%   { transform: translateX(0); }
   25%  { transform: translateX(-2px) skewX(-0.4deg); }
@@ -1419,17 +1418,44 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   100% { transform: translateX(0); }
 }
 
-/* ---- feedback : an archive verification strip ---- */
+/* ---- feedback : an archive verification pop-up ----
+   Shown after every answer — right, wrong, or time-out. A dimmed backdrop
+   covers the page and "Next challenge >" is the only way out. Shown/hidden
+   with the `hidden` attribute, the same pattern as the rest of the game. */
 .feedback {
-  background: rgba(247, 239, 221, 0.95);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: rgba(20, 20, 20, 0.55);
+  animation: feedback-fade 160ms ease;
+}
+/* our `display: grid` above would otherwise beat the browser's [hidden] rule */
+.feedback[hidden] { display: none; }
+@keyframes feedback-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.feedback__box {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: rgba(247, 239, 221, 0.98);
   border: var(--border-ink);
   border-left-width: 8px;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  padding: var(--space-3);
+  padding: var(--space-4) var(--space-3);
+  animation: feedback-pop 180ms ease;
 }
-.feedback--correct { border-left-color: var(--color-teal); }
-.feedback--incorrect { border-left-color: var(--color-coral); }
+@keyframes feedback-pop { from { transform: translateY(10px); } to { transform: translateY(0); } }
+
+.feedback--correct .feedback__box { border-left-color: var(--color-teal); }
+.feedback--incorrect .feedback__box { border-left-color: var(--color-coral); }
+
+/* wrong answer: the pop-up does a brief VHS-tracking wobble instead of the pop */
+.feedback__box--wrong { animation: vhs-tracking 450ms steps(2, end) 2; }
 
 .feedback__strip {
   display: flex;
@@ -1714,7 +1740,7 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   .tape-artifact,
   .feedback__stamp,
   body.heat-onfire .tape-label { transform: none; }
-  .challenge--wrong { animation: none; }
+  .feedback__box--wrong { animation: none; }
   .challenge__countdown--pop { animation: none; }
   .order-card--dragging { transform: none; }
   body { background-attachment: scroll; }
