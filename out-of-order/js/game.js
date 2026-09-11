@@ -717,31 +717,35 @@
   }
 
   /* ---- 3-2-1 intro ------------------------------------------------------
-     Freezes interaction, counts 3 -> 2 -> 1 in the panel, then runs `done`. */
+     A full-screen "Get ready" pop-up covers the whole page — the round's
+     cards/options are already rendered underneath, just not visible yet.
+     One full second per number (a real 3-2-1, not a quick blink), then it
+     disappears and `done` runs (starts the soft timer). */
   function runCountdown(done) {
     if (countdownId) window.clearTimeout(countdownId);
     counting = true;
-    var challenge = $("[data-challenge]");
-    var el = $("[data-countdown]");
-    challenge.classList.add("challenge--counting");
     setChallengeControls(true);        // disable Lock / power-ups / Double Down
 
-    var sequence = ["3", "2", "1", "Go"];
+    var overlay = $("[data-round-countdown]");
+    var el = $("[data-countdown]");
+    overlay.hidden = false;
+
+    var sequence = ["3", "2", "1"];
     var i = 0;
-    var step = prefersReducedMotion() ? 300 : 600;
+    var step = 1000;   // one second per number
 
     function tick() {
       if (i < sequence.length) {
         el.textContent = sequence[i];
-        el.classList.remove("challenge__countdown--pop");
+        el.classList.remove("round-countdown__num--pop");
         void el.offsetWidth;             // restart the pop animation
-        el.classList.add("challenge__countdown--pop");
+        el.classList.add("round-countdown__num--pop");
         announce(sequence[i]);
         i += 1;
         countdownId = window.setTimeout(tick, step);
       } else {
         counting = false;
-        challenge.classList.remove("challenge--counting");
+        overlay.hidden = true;
         setChallengeControls(false);
         refreshMoveButtons($("[data-order-list]"));
         done();
@@ -1571,6 +1575,7 @@
     counting = false;
     $("[data-challenge]").hidden = true;
     $("[data-feedback]").hidden = true;
+    $("[data-round-countdown]").hidden = true;
     var exit = $("[data-exit-row]");
     if (exit) exit.hidden = true;
 

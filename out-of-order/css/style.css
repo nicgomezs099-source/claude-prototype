@@ -918,34 +918,40 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .challenge--no-bonus .hud__value--timer,
 .challenge--no-bonus [data-hud-speed] { color: var(--color-coral); }
 
-/* 3-2-1 "get ready" intro (shown only while .challenge--counting) */
-.challenge__countdown {
-  display: none;
-  align-items: center;
+/* 3-2-1 "get ready" intro — a full-screen pop-up shown before a round's
+   cards/options are revealed. One full second per number (a real 3-2-1,
+   not a blink). Same show/hide pattern as feedback/results: `hidden`. */
+.round-countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  text-align: center;
+  background: var(--color-ink);
 }
-.challenge--counting .challenge__countdown { display: flex; }
-.challenge--counting .challenge__body {
-  opacity: 0.4;
-  filter: saturate(0.5);
-  pointer-events: none;
-}
-.challenge__countdown-label {
+.round-countdown[hidden] { display: none; }
+.round-countdown__label {
   font-family: var(--font-marker);
-  font-size: 1.15rem;
-}
-.challenge__countdown-num {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 9vw, 4rem);
-  line-height: 1;
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-coral);
 }
-.challenge__countdown--pop { animation: countdown-pop 300ms ease; }
+.round-countdown__num {
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 34vw, 13rem);
+  line-height: 1;
+  color: var(--color-bg);
+}
+.round-countdown__num--pop { animation: countdown-pop 850ms ease; }
 @keyframes countdown-pop {
-  0%   { transform: scale(0.55); opacity: 0.2; }
-  45%  { transform: scale(1.12); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.5); opacity: 0; }
+  25%  { transform: scale(1.08); opacity: 1; }
+  40%  { transform: scale(1); opacity: 1; }
+  80%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.94); opacity: 0; }
 }
 
 /* ---- the ORDER card row ---- */
@@ -1741,7 +1747,7 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   .feedback__stamp,
   body.heat-onfire .tape-label { transform: none; }
   .feedback__box--wrong { animation: none; }
-  .challenge__countdown--pop { animation: none; }
+  .round-countdown__num--pop { animation: none; }
   .order-card--dragging { transform: none; }
   body { background-attachment: scroll; }
 }

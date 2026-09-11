@@ -101,11 +101,6 @@
       <h1 id="challenge-heading" class="challenge__instruction" data-challenge-instruction>Oldest &rarr; Newest</h1>
       <p class="challenge__help" data-challenge-help>Arrange these from oldest to newest.</p>
 
-      <div class="challenge__countdown" aria-hidden="true">
-        <span class="challenge__countdown-label">Get ready</span>
-        <span class="challenge__countdown-num" data-countdown>3</span>
-      </div>
-
       <div class="challenge__body" data-challenge-body></div>
 
       <div class="challenge__actions">
@@ -206,6 +201,15 @@
       </div>
       <p class="results__copied" data-copied hidden>&check; Score copied</p>
     </section>
+
+    <!-- ============================================================
+         GET READY  —  full-screen 3-2-1 shown before each round reveals
+         its cards/options. hidden by default; toggled by runCountdown().
+         ============================================================ -->
+    <div class="round-countdown" data-round-countdown hidden aria-hidden="true">
+      <span class="round-countdown__label">Get ready</span>
+      <span class="round-countdown__num" data-countdown>3</span>
+    </div>
 
   </main>
 
