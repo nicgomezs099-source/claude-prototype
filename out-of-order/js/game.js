@@ -452,6 +452,11 @@
     $all("[data-theme-switch]").forEach(function (btn) {
       btn.setAttribute("aria-pressed", String(btn.getAttribute("data-theme-switch") === theme.id));
     });
+
+    // "Start today's run" must launch the SAME edition Home is showing right
+    // now — otherwise picking Sci-Fi here and pressing Play could still land
+    // on whatever edition game.html falls back to (today's date rotation).
+    $all("[data-start-run]").forEach(function (a) { a.setAttribute("href", "game.html?theme=" + theme.id); });
   }
 
   /* Find the theme whose name matches a shelf category (case-insensitive). */
