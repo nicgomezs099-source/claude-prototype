@@ -1180,35 +1180,18 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .order-list--revealing .order-card { cursor: pointer; outline: 2px dashed var(--color-cyan); outline-offset: 2px; }
 
 
-/* ---- MECHANIC 02 : BEFORE / AFTER ----
-   A single draggable tag (BEFORE or AFTER, chosen per round) sits above two
-   title cards. Drag the tag onto a card, or just click/tap the card — both
-   do the same thing. */
-.ba__tag-row { display: flex; justify-content: center; margin-bottom: var(--space-2); }
-.ba__tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.4rem;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.04em;
-  color: var(--color-bg);
-  background: var(--color-ink);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-hard);
-  cursor: grab;
-}
-.ba__tag:active { cursor: grabbing; }
-
-.ba__row {
+/* ---- MECHANIC 02 : WHICH CAME FIRST ----
+   Two title cards. Tap the one that came out first, then Submit Answer.
+   (Was Before/After — the drag tag is gone, the question is now always
+   the same one, so there's nothing left to interpret.) */
+.wcf__row {
   display: grid;
   gap: var(--space-2);
   align-items: stretch;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-.ba-card {
+.wcf-card {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -1224,24 +1207,24 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   cursor: pointer;
   transition: transform 150ms ease, box-shadow 150ms ease;
 }
-.ba-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
-.ba-card:disabled { cursor: not-allowed; }
-.ba-card__art {
+.wcf-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
+.wcf-card:disabled { cursor: not-allowed; }
+.wcf-card__art {
   margin: 0.5rem 0;
   aspect-ratio: 16 / 9;
   border: var(--border-ink);
   border-radius: 6px;
 }
-.ba-card__art::before {
+.wcf-card__art::before {
   background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
   opacity: 1;
 }
-.ba-card__title { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.05; }
-.ba-card__cat { color: rgba(20, 20, 20, 0.55); margin-top: 0.25rem; }
+.wcf-card__title { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.05; }
+.wcf-card__cat { color: rgba(20, 20, 20, 0.55); margin-top: 0.25rem; }
 
 /* ✓ / ✕ mark, revealed alongside the outline so correctness is never
    colour-only */
-.ba-card__mark {
+.wcf-card__mark {
   position: absolute;
   top: 6px; right: 6px;
   z-index: 4;
@@ -1253,19 +1236,16 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   border-radius: 50%;
   background: var(--color-label);
 }
-.ba-card--right .ba-card__mark,
-.ba-card--wrong .ba-card__mark { display: grid; }
-.ba-card--right .ba-card__mark { background: var(--color-teal); color: #fff; }
-.ba-card--wrong .ba-card__mark { background: var(--color-coral); color: #fff; }
+.wcf-card--right .wcf-card__mark,
+.wcf-card--wrong .wcf-card__mark { display: grid; }
+.wcf-card--right .wcf-card__mark { background: var(--color-teal); color: #fff; }
+.wcf-card--wrong .wcf-card__mark { background: var(--color-coral); color: #fff; }
 
-/* drag-hover target + chosen / right / wrong states (icon+text+outline —
-   never colour alone) */
-.ba-card--dragover { outline: 3px dashed var(--theme-primary); outline-offset: 2px; }
-.ba-card--on { background: var(--color-ink); color: var(--color-bg); }
-.ba-card--on .ba-card__cat { color: rgba(247, 239, 221, 0.7); }
-.ba-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
-.ba-card--wrong.ba-card--on { background: var(--color-coral); color: #fff; }
-.ba-card--wrong.ba-card--on .ba-card__cat { color: rgba(255, 255, 255, 0.8); }
+.wcf-card--on { background: var(--color-ink); color: var(--color-bg); }
+.wcf-card--on .wcf-card__cat { color: rgba(247, 239, 221, 0.7); }
+.wcf-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.wcf-card--wrong.wcf-card--on { background: var(--color-coral); color: #fff; }
+.wcf-card--wrong.wcf-card--on .wcf-card__cat { color: rgba(255, 255, 255, 0.8); }
 
 
 /* ---- MECHANIC 03 : INSERT ---- */
@@ -1420,6 +1400,116 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .quote-option--right .quote-option__letter { background: var(--color-teal); color: #fff; border-color: var(--color-teal); }
 .quote-option--wrong.quote-option--on { background: var(--color-coral); color: #fff; }
 .quote-option--out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
+
+/* ---- MECHANIC 05 : ODD ONE OUT ----
+   4 titles in a 2x2 grid at every width (never 1 column) — tap the one
+   that doesn't belong. */
+.ooo__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.ooo-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: #fbf6e9;
+  border: var(--border-ink);
+  border-top: 8px solid var(--card-color, var(--color-coral));
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.ooo-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
+.ooo-card:disabled { cursor: not-allowed; }
+.ooo-card__art { aspect-ratio: 16 / 9; border: var(--border-ink); border-radius: 6px; }
+.ooo-card__art::before {
+  background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.ooo-card__title { font-weight: 700; font-size: 0.85rem; line-height: 1.15; padding: 0.4rem 0.2rem 0.1rem; }
+
+.ooo-card__mark {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 4;
+  display: none;
+  width: 1.6rem; height: 1.6rem;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-label);
+}
+.ooo-card--right .ooo-card__mark,
+.ooo-card--wrong .ooo-card__mark { display: grid; }
+.ooo-card--right .ooo-card__mark { background: var(--color-teal); color: #fff; }
+.ooo-card--wrong .ooo-card__mark { background: var(--color-coral); color: #fff; }
+
+.ooo-card--on { background: var(--color-ink); color: var(--color-bg); }
+.ooo-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.ooo-card--wrong.ooo-card--on { background: var(--color-coral); color: #fff; }
+.ooo-card--out { opacity: 0.35; cursor: not-allowed; }
+
+/* ---- MECHANIC 06 : PIXEL SCENE ("Recognize This Scene?") ----
+   One large supplied image + 3 answer options, styled exactly like QUOTE
+   (same options list, an image instead of a line of dialogue). */
+.pixel-scene {
+  border: var(--border-ink);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  background: var(--color-ink);
+}
+.pixel-scene__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.pixel-scene-options { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.pixel-scene-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 56px;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+.pixel-scene-opt:hover:not(:disabled) { transform: translate(-1px, -1px); background: #fbf3df; }
+.pixel-scene-opt__letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem; height: 1.8rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+}
+.pixel-scene-opt--on { background: var(--color-ink); color: var(--color-bg); }
+.pixel-scene-opt--on .pixel-scene-opt__letter { border-color: var(--color-bg); }
+.pixel-scene-opt--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.pixel-scene-opt--right .pixel-scene-opt__letter { background: var(--color-teal); color: #fff; border-color: var(--color-teal); }
+.pixel-scene-opt--wrong.pixel-scene-opt--on { background: var(--color-coral); color: #fff; }
+.pixel-scene-opt--out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
 
 /* ---- action row : power-ups + double down + lock ---- */
 .challenge__actions {
@@ -1826,6 +1916,7 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
 @media (min-width: 1024px) {
   /* Home becomes two columns: hero | Today's Archive */
   .home { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
+  .type-grid { grid-template-columns: repeat(3, 1fr); }   /* 5 challenge types: 3 + 2 */
 }
 
 /* ---- Game page: stack the card row and the action row on small screens ---- */

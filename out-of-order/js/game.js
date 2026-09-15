@@ -12,7 +12,8 @@
      SHELF         renderShelf()  (decorative category tapes on the Home page)
      DAILY RUN     generateDailyRun()            (Stage 2)
      ROUND FLOW    startRound / renderChallenge  (Stage 2)
-     MECHANICS     order / before-after / insert (Stage 2-3)
+     MECHANICS     Timeline / Which Came First / Odd One Out / Quote /
+                   Pixel Scene / Insert (Insert kept for a future Encore)
      SCORING       speed bonus + round score     (Stage 2-3)
      STREAK/HEAT   updateStreak / updateHeat     (Stage 3)
      POWER-UPS     +5 sec / reveal               (Stage 3)
@@ -289,6 +290,58 @@
       themes: [], year: 2011 }
   ];
 
+  /* ==========================================================================
+     DATA  —  ODD ONE OUT  ("Find the Impostor")
+     4 titles (as CONTENT_ITEMS ids); 3 share the relationship in `prompt`,
+     `answer` is the one that doesn't. The relationship must be a SPECIFIC,
+     checkable fact (medium, decade, etc.) — never a subjective vibe.
+     ======================================================================== */
+  var ODD_ONE_OUT = [
+    { id: "ooo-scifi-1", themes: ["sci-fi"],
+      prompt: "Three are movies. One is a TV series.",
+      answer: "the-mandalorian", items: ["the-matrix", "blade-runner", "star-wars", "the-mandalorian"] },
+    { id: "ooo-scifi-2", themes: ["sci-fi"],
+      prompt: "Three are TV series. One is a movie.",
+      answer: "avatar", items: ["black-mirror", "lost", "rick-and-morty", "avatar"] },
+    { id: "ooo-scifi-3", themes: ["sci-fi"],
+      prompt: "Three came out in the 2010s or later. One is from the 1980s.",
+      answer: "back-to-the-future", items: ["interstellar", "arrival", "dune", "back-to-the-future"] },
+    { id: "ooo-scifi-4", themes: ["sci-fi"],
+      prompt: "Three came out before 2000. One came out after.",
+      answer: "everything-everywhere", items: ["jurassic-park", "terminator-2", "total-recall", "everything-everywhere"] },
+
+    { id: "ooo-horror-1", themes: ["horror"],
+      prompt: "Three are movies. One is a TV series.",
+      answer: "the-walking-dead", items: ["the-shining", "halloween", "scream", "the-walking-dead"] },
+    { id: "ooo-horror-2", themes: ["horror"],
+      prompt: "Three are TV series. One is a movie.",
+      answer: "it", items: ["american-horror-story", "the-walking-dead", "wednesday", "it"] },
+    { id: "ooo-horror-3", themes: ["horror"],
+      prompt: "Three came out in the 2010s. One is from an earlier decade.",
+      answer: "the-shining", items: ["get-out", "hereditary", "midsommar", "the-shining"] },
+    { id: "ooo-horror-4", themes: ["horror"],
+      prompt: "Three came out in the 1970s. One came out much later.",
+      answer: "it", items: ["jaws", "halloween", "the-exorcist", "it"] }
+  ];
+
+  /* ==========================================================================
+     DATA  —  PIXEL SCENE  ("Recognize This Scene?")
+     One large supplied pixel-art image + 3 title options. Tests visual
+     recognition, not chronology — NEVER generate the art in CSS, only real
+     supplied files under assets/images/scenes/.
+
+     Empty for now — drop entries here once artwork is supplied, e.g.:
+     { id: "scene-001", image: "assets/images/scenes/interstellar-01.png",
+       answer: "Interstellar", options: ["Interstellar", "Arrival", "Gravity"],
+       themes: ["sci-fi"] }
+
+     While this list is empty, the Daily Run substitutes an extra Quote
+     round for each Pixel Scene slot so there are always exactly 10
+     playable rounds — see generateDailyRun().
+     ======================================================================== */
+  var PIXEL_SCENES = [
+  ];
+
 
   /* Which SVG icon represents a genre (falls back to a film-strip icon). */
   var GENRE_ICON = {
@@ -347,10 +400,12 @@
   var runDate = null;        // the Date this run was generated for
 
   // per-round answer state (reset in startRound)
-  var baChoice = null;       // "before" | "after"  (BEFORE/AFTER rounds)
-  var insertChoice = null;   // slot index          (INSERT rounds)
-  var quoteChoice = null;    // chosen title        (QUOTE rounds)
-  var revealedYearIds = [];  // ids whose year the REVEAL power-up has shown
+  var insertChoice = null;      // slot index      (INSERT — kept for a future Encore mode)
+  var quoteChoice = null;       // chosen title     (QUOTE rounds)
+  var wcfChoice = null;         // chosen item id   (WHICH CAME FIRST rounds)
+  var oooChoice = null;         // chosen item id   (ODD ONE OUT rounds)
+  var pixelSceneChoice = null;  // chosen title     (PIXEL SCENE rounds)
+  var revealedYearIds = [];     // ids whose year the REVEAL power-up has shown
 
 
   /* ==========================================================================
@@ -708,23 +763,22 @@
   }
 
   /* Round SHAPE: which challenge type, timer, size.
-     4 ORDER · 2 BEFORE/AFTER · 2 INSERT · 2 QUOTE  (chronological stays 8/10).
-     STAGE A (post user-testing): Timeline (ORDER) rounds are always 3 cards
-     now — 4 and 5 cards were too much cognitive load, and are reserved for
-     a future Encore/Advanced mode. Timers below match the post-testing
-     table for every type EXCEPT before-after/insert, which keep their prior
-     15s — Stage B removes both from the Daily Run entirely. */
+     STAGE B (post user-testing): 2 TIMELINE · 2 QUOTE · 3 PIXEL SCENE ·
+     2 ODD ONE OUT · 1 WHICH CAME FIRST. Before/After and Insert no longer
+     appear in the Daily Run (see MECHANIC comments below for why each was
+     kept or removed). Types are mixed so the same kind of round never
+     shows up twice in a row, and round 1 opens on something easy.         */
   var ROUND_PLAN = [
-    { type: "order",        seconds: 25, cards: 3 },
-    { type: "order",        seconds: 25, cards: 3 },
-    { type: "quote",        seconds: 15 },
-    { type: "before-after", seconds: 15 },
-    { type: "insert",       seconds: 15, line: 3 },
+    { type: "pixel-scene",  seconds: 18 },
     { type: "order",        seconds: 25, cards: 3 },
     { type: "quote",        seconds: 15 },
-    { type: "insert",       seconds: 15, line: 4 },
+    { type: "odd-one-out",  seconds: 18 },
+    { type: "pixel-scene",  seconds: 18 },
+    { type: "which-first",  seconds: 15 },
     { type: "order",        seconds: 25, cards: 3 },
-    { type: "before-after", seconds: 15 }
+    { type: "quote",        seconds: 15 },
+    { type: "odd-one-out",  seconds: 18 },
+    { type: "pixel-scene",  seconds: 18 }
   ];
 
   /* seeded array shuffle */
@@ -737,9 +791,9 @@
     return a;
   }
 
-  /* pick two titles for a BEFORE/AFTER round: the pair with the widest year
-     gap from a small batch, so the comparison is answerable (no ties). */
-  function pickBeforeAfterPair(batch, rng) {
+  /* pick two titles for a WHICH CAME FIRST round: the pair with the widest
+     year gap from a small batch, so the comparison is answerable (no ties). */
+  function pickWidestGapPair(batch, rng) {
     var best = [batch[0], batch[1]];
     var bestGap = -1;
     for (var a = 0; a < batch.length; a++) {
@@ -748,7 +802,7 @@
         if (g > bestGap) { bestGap = g; best = [batch[a], batch[b]]; }
       }
     }
-    return rng() < 0.5 ? best : [best[1], best[0]];   // randomise reference / comparison
+    return rng() < 0.5 ? best : [best[1], best[0]];   // randomise which one renders left/right
   }
 
   /* ---- Daily Theme content ------------------------------------------------
@@ -769,9 +823,11 @@
     var themeId = getDailyTheme(date).id;
     var rng = mulberry32(dayNumber(date) * 2654435761 + stringSeed(themeId));
 
-    var pool  = shuffleArr(getThemeChallengePool(themeId), rng);
-    var qPool = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; }), rng);
-    var pi = 0, qi = 0;
+    var pool      = shuffleArr(getThemeChallengePool(themeId), rng);
+    var qPool     = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; }), rng);
+    var scenePool = shuffleArr(PIXEL_SCENES.filter(function (s) { return s.themes.indexOf(themeId) !== -1; }), rng);
+    var oooPool   = shuffleArr(ODD_ONE_OUT.filter(function (s) { return s.themes.indexOf(themeId) !== -1; }), rng);
+    var pi = 0, qi = 0, sci = 0, ooi = 0;
 
     function nextItem() {
       if (pi >= pool.length) pi = 0;   // safety net — the pools are sized not to need this
@@ -786,19 +842,40 @@
       if (qi >= qPool.length) qi = 0;
       return qPool[qi++];
     }
+    /* null when no Pixel Scene artwork has been supplied for this theme yet */
+    function nextScene() {
+      if (!scenePool.length) return null;
+      if (sci >= scenePool.length) sci = 0;
+      return scenePool[sci++];
+    }
+    function nextOddOneOutSet() {
+      if (!oooPool.length) return null;
+      if (ooi >= oooPool.length) ooi = 0;
+      return oooPool[ooi++];
+    }
+    function buildOddOneOutRound() {
+      var set = nextOddOneOutSet();
+      if (!set) return { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };  // last-resort fallback
+      return { type: "odd-one-out", set: set, items: shuffleArr(set.items.map(itemById), rng) };
+    }
 
     return ROUND_PLAN.map(function (plan) {
       var extra;
 
       if (plan.type === "quote") {
         extra = { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
-      } else if (plan.type === "before-after") {
-        var pair = pickBeforeAfterPair(takeItems(3), rng);
-        extra = {
-          type: "before-after", itemA: pair[0], itemB: pair[1],
-          label: rng() < 0.5 ? "before" : "after"
-        };
+      } else if (plan.type === "which-first") {
+        var pair = pickWidestGapPair(takeItems(3), rng);
+        extra = { type: "which-first", itemA: pair[0], itemB: pair[1] };
+      } else if (plan.type === "odd-one-out") {
+        extra = buildOddOneOutRound();
+      } else if (plan.type === "pixel-scene") {
+        // no artwork supplied yet for this theme -> fall back to an extra
+        // Quote round so the Daily Run still has exactly 10 playable rounds
+        var scene = nextScene();
+        extra = scene ? { type: "pixel-scene", scene: scene } : { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
       } else if (plan.type === "insert") {
+        // kept for a future Encore mode — not reachable from ROUND_PLAN today
         var set = takeItems(plan.line + 1).slice().sort(function (a, b) { return a.year - b.year; });
         var k = 1 + Math.floor(rng() * Math.max(1, set.length - 2));
         var card = set[k];
@@ -896,10 +973,12 @@
   /* ORDER can be locked anytime; the others need a choice first */
   function canLock() {
     var round = currentRound();
-    if (round.type === "before-after") return baChoice !== null;
     if (round.type === "insert") return insertChoice !== null;
     if (round.type === "quote") return quoteChoice !== null;
-    return true;
+    if (round.type === "which-first") return wcfChoice !== null;
+    if (round.type === "odd-one-out") return oooChoice !== null;
+    if (round.type === "pixel-scene") return pixelSceneChoice !== null;
+    return true;   // "order" (Timeline) can always be locked
   }
 
   function currentRound() { return gameState.run[gameState.round - 1]; }
@@ -909,9 +988,11 @@
     body.innerHTML = "";
     body.className = "challenge__body challenge__body--" + round.type;
 
-    baChoice = null;
     insertChoice = null;
     quoteChoice = null;
+    wcfChoice = null;
+    oooChoice = null;
+    pixelSceneChoice = null;
     revealedYearIds = [];
 
     var nn = ("0" + gameState.round).slice(-2);
@@ -919,9 +1000,11 @@
     text("[data-challenge-tag]", tag);
 
     if (round.type === "order") renderOrder(round, body);
-    else if (round.type === "before-after") renderBeforeAfter(round, body);
     else if (round.type === "insert") renderInsert(round, body);
     else if (round.type === "quote") renderQuote(round, body);
+    else if (round.type === "which-first") renderWhichCameFirst(round, body);
+    else if (round.type === "odd-one-out") renderOddOneOut(round, body);
+    else if (round.type === "pixel-scene") renderPixelSceneChallenge(round, body);
   }
 
   function renderHud() {
@@ -1108,95 +1191,65 @@
 
 
   /* ==========================================================================
-     MECHANIC 02  —  BEFORE / AFTER
-     One tag — "BEFORE" or "AFTER" (which one shows is randomised per round) —
-     and two titles. The player drags the tag onto whichever title matches it
-     (or just clicks/taps the title — the drag is a bonus, not a requirement).
+     MECHANIC 02  —  WHICH CAME FIRST
+     Two titles, one question, always the same: which came out first? No
+     "reference/comparison" framing, no Before/After tag to interpret —
+     tap the title, then Submit Answer. Replaces the old Before/After round
+     (user testing found the reference/comparison framing confusing).
      ======================================================================== */
 
-  function renderBeforeAfter(round, body) {
-    var tagText = round.label === "before" ? "BEFORE" : "AFTER";
-    text("[data-challenge-instruction]", "Before or After?");
+  function renderWhichCameFirst(round, body) {
+    text("[data-challenge-instruction]", "Which Came First?");
     text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "2 Titles");
-    text("[data-challenge-help]",
-      "Which title came out " + (round.label === "before" ? "earlier" : "later") +
-      "? Drag " + tagText + " onto it, or just click it.");
+    text("[data-challenge-help]", "Tap the title that came out first.");
 
     body.innerHTML =
-      '<div class="ba__tag-row" aria-hidden="true">' +
-        '<span class="ba__tag" data-ba-tag draggable="true">' + tagText + '</span>' +
-      '</div>' +
-      '<div class="ba__row">' +
-        baCard(round.itemA) +
-        baCard(round.itemB) +
+      '<div class="wcf__row">' +
+        wcfCard(round.itemA) +
+        wcfCard(round.itemB) +
       '</div>';
 
-    loadPosterImage($('[data-ba-card="' + round.itemA.id + '"] .poster', body), cardArtSrc(round.itemA), round.itemA.focus);
-    loadPosterImage($('[data-ba-card="' + round.itemB.id + '"] .poster', body), cardArtSrc(round.itemB), round.itemB.focus);
+    loadPosterImage($('[data-wcf-card="' + round.itemA.id + '"] .poster', body), cardArtSrc(round.itemA), round.itemA.focus);
+    loadPosterImage($('[data-wcf-card="' + round.itemB.id + '"] .poster', body), cardArtSrc(round.itemB), round.itemB.focus);
 
-    $all("[data-ba-card]", body).forEach(function (btn) {
-      var id = btn.getAttribute("data-ba-card");
-      btn.addEventListener("click", function () { setBaChoice(id); });
-      btn.addEventListener("dragover", function (e) { e.preventDefault(); btn.classList.add("ba-card--dragover"); });
-      btn.addEventListener("dragleave", function () { btn.classList.remove("ba-card--dragover"); });
-      btn.addEventListener("drop", function (e) {
-        e.preventDefault();
-        btn.classList.remove("ba-card--dragover");
-        setBaChoice(id);
-      });
+    $all("[data-wcf-card]", body).forEach(function (btn) {
+      var id = btn.getAttribute("data-wcf-card");
+      btn.addEventListener("click", function () { setWcfChoice(id); });
     });
-
-    var tag = $("[data-ba-tag]", body);
-    if (tag) {
-      tag.addEventListener("dragstart", function (e) {
-        if (answered || counting) { e.preventDefault(); return; }
-        e.dataTransfer.effectAllowed = "move";
-        try { e.dataTransfer.setData("text/plain", tagText); } catch (x) {}
-      });
-    }
 
     $("[data-submit]").disabled = true;   // enabled once a choice is made
   }
 
-  /* a title card that doubles as a drop target for the BEFORE/AFTER tag */
-  function baCard(item) {
-    return '<button type="button" class="ba-card" data-ba-card="' + item.id + '"' +
+  function wcfCard(item) {
+    return '<button type="button" class="wcf-card" data-wcf-card="' + item.id + '"' +
              ' style="--card-color:' + genreColor(item.category) + '" aria-pressed="false">' +
-             '<div class="ba-card__art poster" data-card-art>' + posterInner(item) +
-               '<span class="ba-card__mark" data-ba-mark aria-hidden="true"></span>' +
+             '<div class="wcf-card__art poster" data-card-art>' + posterInner(item) +
+               '<span class="wcf-card__mark" data-wcf-mark aria-hidden="true"></span>' +
              '</div>' +
-             '<p class="ba-card__title">' + titleWithVersion(item) + '</p>' +
-             '<p class="meta ba-card__cat">' + item.category + '</p>' +
+             '<p class="wcf-card__title">' + titleWithVersion(item) + '</p>' +
+             '<p class="meta wcf-card__cat">' + item.category + '</p>' +
              yearTag(item) +
            '</button>';
   }
 
-  function setBaChoice(id) {
+  function setWcfChoice(id) {
     if (answered || counting) return;
-    baChoice = id;
-    $all("[data-ba-card]").forEach(function (btn) {
-      var on = btn.getAttribute("data-ba-card") === id;
+    wcfChoice = id;
+    $all("[data-wcf-card]").forEach(function (btn) {
+      var on = btn.getAttribute("data-wcf-card") === id;
       btn.setAttribute("aria-pressed", String(on));
-      btn.classList.toggle("ba-card--on", on);
+      btn.classList.toggle("wcf-card--on", on);
     });
     $("[data-submit]").disabled = false;
     announce(itemById(id).title + " selected.");
   }
 
-  /* the earlier / later title for the round's pair (ties broken consistently) */
-  function baOrder(round) {
-    var earlier = round.itemA.year <= round.itemB.year ? round.itemA : round.itemB;
-    var later   = round.itemA.year <= round.itemB.year ? round.itemB : round.itemA;
-    return { earlier: earlier, later: later };
-  }
-
-  function checkBeforeAfterAnswer() {
+  function checkWhichCameFirst() {
     var round = currentRound();
-    if (!baChoice) return false;
-    var order = baOrder(round);
-    var wantId = round.label === "before" ? order.earlier.id : order.later.id;
-    return baChoice === wantId;
+    if (!wcfChoice) return false;
+    var earlier = round.itemA.year <= round.itemB.year ? round.itemA : round.itemB;
+    return wcfChoice === earlier.id;
   }
 
 
@@ -1346,6 +1399,126 @@
 
 
   /* ==========================================================================
+     MECHANIC 05  —  ODD ONE OUT  ("Find the Impostor")
+     4 titles; 3 share the relationship named in round.set.prompt, one is
+     the impostor. Tap the one that doesn't belong, then Submit Answer.
+     ======================================================================== */
+
+  function renderOddOneOut(round, body) {
+    text("[data-challenge-instruction]", "Odd One Out");
+    text("[data-submit]", "Submit Answer ✓");
+    text("[data-challenge-count]", "4 Titles");
+    text("[data-challenge-help]", round.set.prompt + " Tap the one that doesn't belong.");
+
+    var html = '<div class="ooo__grid">';
+    round.items.forEach(function (item) { html += oooCard(item); });
+    html += '</div>';
+    body.innerHTML = html;
+
+    round.items.forEach(function (item) {
+      loadPosterImage($('[data-ooo-card="' + item.id + '"] .poster', body), cardArtSrc(item), item.focus);
+    });
+
+    $all("[data-ooo-card]", body).forEach(function (btn) {
+      var id = btn.getAttribute("data-ooo-card");
+      btn.addEventListener("click", function () { setOooChoice(id); });
+    });
+
+    $("[data-submit]").disabled = true;
+  }
+
+  function oooCard(item) {
+    return '<button type="button" class="ooo-card" data-ooo-card="' + item.id + '"' +
+             ' style="--card-color:' + genreColor(item.category) + '" aria-pressed="false">' +
+             '<div class="ooo-card__art poster" data-card-art>' + posterInner(item) +
+               '<span class="ooo-card__mark" data-ooo-mark aria-hidden="true"></span>' +
+             '</div>' +
+             '<p class="ooo-card__title">' + titleWithVersion(item) + '</p>' +
+           '</button>';
+  }
+
+  function setOooChoice(id) {
+    if (answered || counting) return;
+    oooChoice = id;
+    $all("[data-ooo-card]").forEach(function (btn) {
+      var on = btn.getAttribute("data-ooo-card") === id;
+      btn.setAttribute("aria-pressed", String(on));
+      btn.classList.toggle("ooo-card--on", on);
+    });
+    $("[data-submit]").disabled = false;
+    announce(itemById(id).title + " selected.");
+  }
+
+  function checkOddOneOutAnswer() {
+    return oooChoice === currentRound().set.answer;
+  }
+
+
+  /* ==========================================================================
+     MECHANIC 06  —  PIXEL SCENE  ("Recognize This Scene?")
+     One large supplied pixel-art image, 3 title options — same shape as
+     QUOTE, just an image instead of a line of dialogue. Tests visual
+     recognition, not chronology.
+     ======================================================================== */
+
+  function renderPixelSceneChallenge(round, body) {
+    var scene = round.scene;
+    text("[data-challenge-instruction]", "Recognize This Scene?");
+    text("[data-submit]", "Submit Answer ✓");
+    text("[data-challenge-count]", "Pixel Scene");
+    text("[data-challenge-help]", "Which Movie or Series is this from?  ·  keys 1 / 2 / 3");
+
+    var opts = shuffleArr(scene.options, mulberry32(stringSeed(scene.id)));
+
+    var html =
+      '<div class="pixel-scene">' +
+        '<img class="pixel-scene__img" src="' + scene.image + '" alt="">' +
+      '</div>' +
+      '<ul class="pixel-scene-options" aria-label="Answer options">';
+    opts.forEach(function (title, i) {
+      html +=
+        '<li><button type="button" class="pixel-scene-opt" data-scene-opt="' + i + '" aria-pressed="false">' +
+          '<span class="pixel-scene-opt__letter" aria-hidden="true">' + (i + 1) + '</span>' +
+          '<span class="pixel-scene-opt__title">' + title + '</span>' +
+        '</button></li>';
+    });
+    html += '</ul>';
+    body.innerHTML = html;
+
+    $all("[data-scene-opt]", body).forEach(function (btn) {
+      var title = opts[parseInt(btn.getAttribute("data-scene-opt"), 10)];
+      btn.setAttribute("data-scene-title", title);
+      btn.addEventListener("click", function () { setPixelSceneChoice(title); });
+    });
+
+    $("[data-submit]").disabled = true;
+  }
+
+  function setPixelSceneChoice(title) {
+    if (answered || counting) return;
+    pixelSceneChoice = title;
+    $all("[data-scene-opt]").forEach(function (btn) {
+      var on = btn.getAttribute("data-scene-title") === title;
+      btn.setAttribute("aria-pressed", String(on));
+      btn.classList.toggle("pixel-scene-opt--on", on);
+    });
+    $("[data-submit]").disabled = false;
+    announce(title + " selected.");
+  }
+
+  /* keyboard 1 / 2 / 3, shared with QUOTE */
+  function sceneKey(n) {
+    if (answered || counting || currentRound().type !== "pixel-scene") return;
+    var btn = $all("[data-scene-opt]")[n - 1];
+    if (btn && !btn.disabled) setPixelSceneChoice(btn.getAttribute("data-scene-title"));
+  }
+
+  function checkPixelSceneAnswer() {
+    return pixelSceneChoice === currentRound().scene.answer;
+  }
+
+
+  /* ==========================================================================
      TIMER
      Counting down never shows a harsh "GAME OVER". But when it reaches 0 the
      round DOES close: whatever the player has picked so far is locked in
@@ -1443,8 +1616,9 @@
     announce("Added 5 seconds. " + gameState.timeRemaining + " seconds left.");
   }
 
-  /* REVEAL: ORDER -> pick a card ; BEFORE/AFTER + INSERT -> show the one
-     hidden year that matters ; QUOTE -> remove one wrong answer. */
+  /* REVEAL: ORDER -> pick a card ; WHICH CAME FIRST + INSERT -> show the one
+     hidden year that matters ; QUOTE / PIXEL SCENE -> remove one wrong
+     answer ; ODD ONE OUT -> remove one item that isn't the impostor. */
   function useReveal() {
     if (answered || counting || gameState.powerUps.reveal < 1) return;
     var round = currentRound();
@@ -1454,21 +1628,45 @@
       $("[data-order-list]").classList.add("order-list--revealing");
       text("[data-challenge-help]", "Reveal: pick one card to show its release year.");
       announce("Pick a card to reveal its release year.");
-    } else if (round.type === "before-after") {
+    } else if (round.type === "which-first") {
       spendReveal(round.itemB.id);
     } else if (round.type === "insert") {
       spendReveal(round.card.id);
     } else if (round.type === "quote") {
-      var wrong = $all("[data-quote-opt]").filter(function (b) {
+      var wrongQuote = $all("[data-quote-opt]").filter(function (b) {
         return b.getAttribute("data-quote-title") !== round.quote.answer &&
                !b.classList.contains("quote-option--out");
       });
-      if (wrong.length) {
+      if (wrongQuote.length) {
         gameState.powerUps.reveal -= 1;
-        wrong[0].classList.add("quote-option--out");
-        wrong[0].disabled = true;
+        wrongQuote[0].classList.add("quote-option--out");
+        wrongQuote[0].disabled = true;
         renderPowerups();
         announce("One wrong answer removed.");
+      }
+    } else if (round.type === "pixel-scene") {
+      var wrongScene = $all("[data-scene-opt]").filter(function (b) {
+        return b.getAttribute("data-scene-title") !== round.scene.answer &&
+               !b.classList.contains("pixel-scene-opt--out");
+      });
+      if (wrongScene.length) {
+        gameState.powerUps.reveal -= 1;
+        wrongScene[0].classList.add("pixel-scene-opt--out");
+        wrongScene[0].disabled = true;
+        renderPowerups();
+        announce("One wrong answer removed.");
+      }
+    } else if (round.type === "odd-one-out") {
+      var notImpostor = $all("[data-ooo-card]").filter(function (b) {
+        return b.getAttribute("data-ooo-card") !== round.set.answer &&
+               !b.classList.contains("ooo-card--out");
+      });
+      if (notImpostor.length) {
+        gameState.powerUps.reveal -= 1;
+        notImpostor[0].classList.add("ooo-card--out");
+        notImpostor[0].disabled = true;
+        renderPowerups();
+        announce("One item removed from consideration.");
       }
     }
   }
@@ -1551,9 +1749,11 @@
   /* run the right checker for the current round's type (ORDER uses partial
      accuracy instead — see calculateTimelineAccuracy()) */
   function checkAnswer(round) {
-    if (round.type === "before-after") return checkBeforeAfterAnswer();
     if (round.type === "insert") return checkInsertAnswer();
     if (round.type === "quote") return checkQuoteAnswer();
+    if (round.type === "which-first") return checkWhichCameFirst();
+    if (round.type === "odd-one-out") return checkOddOneOutAnswer();
+    if (round.type === "pixel-scene") return checkPixelSceneAnswer();
     return null;   // "order" is handled separately in lockAnswer()
   }
 
@@ -1650,8 +1850,10 @@
     // type-specific marking
     var correctSequence;
     if (round.type === "order") correctSequence = revealOrder(round);
-    else if (round.type === "before-after") correctSequence = revealBeforeAfter(round);
     else if (round.type === "insert") correctSequence = revealInsert(round);
+    else if (round.type === "which-first") correctSequence = revealWhichCameFirst(round);
+    else if (round.type === "odd-one-out") correctSequence = revealOddOneOut(round);
+    else if (round.type === "pixel-scene") correctSequence = revealPixelScene(round);
     else correctSequence = revealQuote(round);
 
     // Timeline rounds have 3 states (correct / partial / incorrect); every
@@ -1686,12 +1888,16 @@
     text("[data-feedback-title]", titleText);
     text("[data-feedback-stamp]", state === "correct" ? "Archive verified" : "Please rewind");
 
-    // "2 / 3 relationships correct" — Timeline only
+    // Timeline: "2 / 3 relationships correct". Odd One Out: explain WHY —
+    // this is the "teach, don't just grade" moment the redesign asked for.
     var subtitle = $("[data-feedback-subtitle]");
     if (subtitle) {
       if (round.type === "order") {
         subtitle.hidden = false;
         subtitle.textContent = accuracy.correct + " / " + accuracy.total + " relationships correct";
+      } else if (round.type === "odd-one-out") {
+        subtitle.hidden = false;
+        subtitle.textContent = itemById(round.set.answer).title + " is the impostor — " + round.set.prompt;
       } else {
         subtitle.hidden = true;
       }
@@ -1713,9 +1919,14 @@
     text("[data-feedback-streak]", isCorrect ? "Streak ×" + gameState.streak : "Streak reset");
     text("[data-next]", gameState.round >= 10 ? "See results →" : "Next challenge →");
 
-    var announceMsg = round.type === "order"
-      ? titleText + ". " + accuracy.correct + " of " + accuracy.total + " relationships correct. "
-      : (isCorrect ? "Correct. " : "Out of order. ");
+    var announceMsg;
+    if (round.type === "order") {
+      announceMsg = titleText + ". " + accuracy.correct + " of " + accuracy.total + " relationships correct. ";
+    } else if (round.type === "odd-one-out") {
+      announceMsg = (isCorrect ? "Correct. " : "Wrong. ") + subtitle.textContent + ". ";
+    } else {
+      announceMsg = isCorrect ? "Correct. " : "Out of order. ";
+    }
     announce(announceMsg + "Round score " + roundScore + ". Streak " + gameState.streak + ".");
 
     // move focus into the pop-up so keyboard players land on "Next challenge"
@@ -1725,14 +1936,18 @@
 
   /* "order" isn't here — Timeline always uses TIMELINE_FEEDBACK_TITLE below now. */
   var FEEDBACK_TITLE = {
-    "before-after": "Called it",
     "insert": "Slotted in",
-    "quote": "Nice catch"
+    "quote": "Nice catch",
+    "which-first": "Called it",
+    "odd-one-out": "Spotted it",
+    "pixel-scene": "Good eye"
   };
   var FEEDBACK_TITLE_WRONG = {
-    "before-after": "Wrong call",
     "insert": "Wrong slot",
-    "quote": "Wrong tape"
+    "quote": "Wrong tape",
+    "which-first": "Wrong call",
+    "odd-one-out": "Blended in",
+    "pixel-scene": "Not quite"
   };
 
   /* Timeline feedback title, keyed by how many of the 3 relationships were
@@ -1770,21 +1985,6 @@
     return sorted;
   }
 
-  /* mark the correct BEFORE/AFTER card (outline + ✓/✕, never colour alone);
-     return both titles in year order */
-  function revealBeforeAfter(round) {
-    var order = baOrder(round);
-    var wantId = round.label === "before" ? order.earlier.id : order.later.id;
-    $all("[data-ba-card]").forEach(function (btn) {
-      var id = btn.getAttribute("data-ba-card");
-      var right = id === wantId;
-      btn.classList.add(right ? "ba-card--right" : "ba-card--wrong");
-      var mark = $("[data-ba-mark]", btn);
-      if (mark) mark.textContent = right ? "✓" : "✕";
-    });
-    return [order.earlier, order.later];
-  }
-
   /* highlight the correct INSERT slot; return the full sorted timeline */
   function revealInsert(round) {
     $all("[data-slot]").forEach(function (btn) {
@@ -1794,6 +1994,46 @@
     });
     var full = round.timeline.concat([round.card]).sort(function (a, b) { return a.year - b.year; });
     return full;
+  }
+
+  /* mark the earlier title (✓/right) and, if different, the player's own
+     wrong pick (✕); return both titles in year order */
+  function revealWhichCameFirst(round) {
+    var earlier = round.itemA.year <= round.itemB.year ? round.itemA : round.itemB;
+    var later   = round.itemA.year <= round.itemB.year ? round.itemB : round.itemA;
+    $all("[data-wcf-card]").forEach(function (btn) {
+      var id = btn.getAttribute("data-wcf-card");
+      var mark = $("[data-wcf-mark]", btn);
+      if (id === earlier.id) { btn.classList.add("wcf-card--right"); if (mark) mark.textContent = "✓"; }
+      else if (id === wcfChoice) { btn.classList.add("wcf-card--wrong"); if (mark) mark.textContent = "✕"; }
+    });
+    return [earlier, later];
+  }
+
+  /* mark the impostor (✓/right — it WAS the correct thing to tap) and, if
+     different, the player's own wrong pick (✕). No chronological order to
+     show, so the explanation lives in the feedback subtitle instead. */
+  function revealOddOneOut(round) {
+    $all("[data-ooo-card]").forEach(function (btn) {
+      var id = btn.getAttribute("data-ooo-card");
+      var mark = $("[data-ooo-mark]", btn);
+      if (id === round.set.answer) { btn.classList.add("ooo-card--right"); if (mark) mark.textContent = "✓"; }
+      else if (id === oooChoice) { btn.classList.add("ooo-card--wrong"); if (mark) mark.textContent = "✕"; }
+    });
+    return [];
+  }
+
+  /* mark the correct Pixel Scene option, same pattern as QUOTE. No
+     chronological row to show — this challenge is about recognition, not
+     dates, so the highlighted option is the only reveal it needs. */
+  function revealPixelScene(round) {
+    var scene = round.scene;
+    $all("[data-scene-opt]").forEach(function (btn) {
+      var title = btn.getAttribute("data-scene-title");
+      if (title === scene.answer) btn.classList.add("pixel-scene-opt--right");
+      else if (title === pixelSceneChoice) btn.classList.add("pixel-scene-opt--wrong");
+    });
+    return [];
   }
 
   function goToNextRound() {
@@ -1911,14 +2151,14 @@
       }
     });
 
-    // keyboard shortcut: 1 / 2 / 3 for QUOTE options (BEFORE/AFTER and INSERT
-    // are answered by Tab-ing to a card/slot and pressing Enter or Space)
+    // keyboard shortcut: 1 / 2 / 3 for QUOTE and PIXEL SCENE options (every
+    // other type is answered by Tab-ing to a card and pressing Enter/Space)
     document.addEventListener("keydown", function (e) {
       if (answered || counting) return;
-      if (currentRound().type === "quote" && (e.key === "1" || e.key === "2" || e.key === "3")) {
-        e.preventDefault();
-        quoteKey(parseInt(e.key, 10));
-      }
+      if (e.key !== "1" && e.key !== "2" && e.key !== "3") return;
+      var t = currentRound().type;
+      if (t === "quote") { e.preventDefault(); quoteKey(parseInt(e.key, 10)); }
+      else if (t === "pixel-scene") { e.preventDefault(); sceneKey(parseInt(e.key, 10)); }
     });
     on("[data-double-down]", "click", toggleDoubleDown);
     on("[data-copy-score]", "click", copyScore);
