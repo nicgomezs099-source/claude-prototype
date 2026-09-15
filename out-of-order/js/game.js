@@ -939,6 +939,26 @@
       for (var i = 0; i < n; i++) { var it = nextItem(wild); if (it) out.push(it); }
       return out;
     }
+    /* like takeItems(), but for Timeline (order) rounds specifically: two
+       cards sharing a release year makes "oldest -> newest" ambiguous (which
+       one goes first?), which confused testers. Skips any item whose year
+       is already picked, so every card in the round is a different year.
+       `tries` caps how far it'll search before giving up (defensive only —
+       our pools span enough decades that this should never actually bite). */
+    function takeItemsDistinctYears(n, wild) {
+      var out = [];
+      var usedYears = {};
+      var tries = n * 8;
+      while (out.length < n && tries > 0) {
+        tries--;
+        var it = nextItem(wild);
+        if (!it) break;
+        if (usedYears[it.year]) continue;   // same year as a card we already have — skip it
+        usedYears[it.year] = true;
+        out.push(it);
+      }
+      return out;
+    }
     function nextQuote(wild) {
       if (wild) { if (wqi >= wildQPool.length) wqi = 0; return wildQPool[wqi++]; }
       if (qi >= qPool.length) qi = 0;
@@ -983,7 +1003,7 @@
         wild = false;   // Pixel Scene is never a wildcard either
       } else if (plan.type === "insert") {
         // kept for a future Encore mode — not reachable from ROUND_PLAN today
-        var set = takeItems(plan.line + 1, wild).slice().sort(function (a, b) { return a.year - b.year; });
+        var set = takeItemsDistinctYears(plan.line + 1, wild).slice().sort(function (a, b) { return a.year - b.year; });
         var k = 1 + Math.floor(rng() * Math.max(1, set.length - 2));
         var card = set[k];
         var line = set.filter(function (it) { return it !== card; });
@@ -992,7 +1012,9 @@
           correctSlot: line.filter(function (it) { return it.year < card.year; }).length
         };
       } else {
-        extra = { type: "order", items: presentOrder(takeItems(plan.cards, wild)) };
+        // distinct years only — two cards from the same year make "oldest
+        // -> newest" ambiguous (per user testing feedback)
+        extra = { type: "order", items: presentOrder(takeItemsDistinctYears(plan.cards, wild)) };
       }
 
       extra.seconds = plan.seconds;
