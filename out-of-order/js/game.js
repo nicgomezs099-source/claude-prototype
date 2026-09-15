@@ -330,16 +330,21 @@
      recognition, not chronology — NEVER generate the art in CSS, only real
      supplied files under assets/images/scenes/.
 
-     Empty for now — drop entries here once artwork is supplied, e.g.:
-     { id: "scene-001", image: "assets/images/scenes/interstellar-01.png",
-       answer: "Interstellar", options: ["Interstellar", "Arrival", "Gravity"],
-       themes: ["sci-fi"] }
-
-     While this list is empty, the Daily Run substitutes an extra Quote
-     round for each Pixel Scene slot so there are always exactly 10
-     playable rounds — see generateDailyRun().
+     Only 2 scenes exist per theme so far — a Daily Run needs 3 Pixel Scene
+     rounds, so the 3rd always falls back to an extra Quote round instead of
+     repeating a scene within the same run (see nextScene() in
+     generateDailyRun()). Drop more entries here as artwork arrives; once a
+     theme has 3+, every Pixel Scene slot fills for real.
      ======================================================================== */
   var PIXEL_SCENES = [
+    { id: "scene-it-cornfield", image: "assets/images/scenes/it-cornfield.png",
+      answer: "It", options: ["It", "Halloween", "Scream"], themes: ["horror"] },
+    { id: "scene-it-closeup", image: "assets/images/scenes/it-closeup.png",
+      answer: "It", options: ["It", "The Conjuring", "Hereditary"], themes: ["horror"] },
+    { id: "scene-back-to-the-future", image: "assets/images/scenes/back-to-the-future-01.png",
+      answer: "Back to the Future", options: ["Back to the Future", "E.T. the Extra-Terrestrial", "Close Encounters of the Third Kind"], themes: ["sci-fi"] },
+    { id: "scene-inception", image: "assets/images/scenes/inception-top.png",
+      answer: "Inception", options: ["Inception", "Interstellar", "Arrival"], themes: ["sci-fi"] }
   ];
 
 
@@ -843,9 +848,12 @@
       return qPool[qi++];
     }
     /* null when no Pixel Scene artwork has been supplied for this theme yet */
+    /* unlike the other pools, this one does NOT wrap around — with only a
+       couple of scenes per theme so far, wrapping would show the same
+       scene twice in one run. Once exhausted, the caller falls back to an
+       extra Quote round instead (see below). */
     function nextScene() {
-      if (!scenePool.length) return null;
-      if (sci >= scenePool.length) sci = 0;
+      if (sci >= scenePool.length) return null;
       return scenePool[sci++];
     }
     function nextOddOneOutSet() {
@@ -870,8 +878,8 @@
       } else if (plan.type === "odd-one-out") {
         extra = buildOddOneOutRound();
       } else if (plan.type === "pixel-scene") {
-        // no artwork supplied yet for this theme -> fall back to an extra
-        // Quote round so the Daily Run still has exactly 10 playable rounds
+        // once this theme's scenes run out (still just 2 each today) ->
+        // fall back to an extra Quote round instead of repeating one
         var scene = nextScene();
         extra = scene ? { type: "pixel-scene", scene: scene } : { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
       } else if (plan.type === "insert") {
