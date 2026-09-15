@@ -999,6 +999,39 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 }
 
 /* ---- the ORDER card row ---- */
+/* persistent direction guide above every Timeline round — which end is
+   oldest is never left to guesswork */
+.timeline-direction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.timeline-direction__end {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.65);
+  white-space: nowrap;
+}
+.timeline-direction__line {
+  flex: 1;
+  position: relative;
+  height: 1px;
+  background: rgba(20, 20, 20, 0.25);
+}
+.timeline-direction__arrow {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--theme-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .order-list {
   display: grid;
   gap: var(--space-2);
@@ -1059,6 +1092,14 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   line-height: 1.15;
   padding: 0.6rem 0.6rem 0.4rem;
   flex: 1;
+}
+
+/* remake/reboot/version disambiguator — e.g. "Dune (Villeneuve Film)".
+   Only titles that need it carry one; never reveals the release year. */
+.version-label {
+  font-weight: 500;
+  font-size: 0.8em;
+  color: rgba(20, 20, 20, 0.55);
 }
 
 /* release-year tag (hidden until REVEAL or feedback) — shared by all 3 types */
@@ -1522,6 +1563,7 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 @keyframes feedback-pop { from { transform: translateY(10px); } to { transform: translateY(0); } }
 
 .feedback--correct .feedback__box { border-left-color: var(--color-teal); }
+.feedback--partial .feedback__box { border-left-color: var(--color-orange); }
 .feedback--incorrect .feedback__box { border-left-color: var(--color-coral); }
 
 /* wrong answer: the pop-up does a brief VHS-tracking wobble instead of the pop */
@@ -1542,8 +1584,10 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   font-weight: 700;
 }
 .feedback--correct .feedback__mark { background: var(--color-teal); color: #fff; }
+.feedback--partial .feedback__mark { background: var(--color-orange); color: #fff; }
 .feedback--incorrect .feedback__mark { background: var(--color-coral); color: #fff; }
 .feedback__title { font-family: var(--font-display); font-size: clamp(1.2rem, 5vw, 1.8rem); }
+.feedback__subtitle { color: rgba(20, 20, 20, 0.65); font-weight: 600; margin-top: -0.3rem; }
 .feedback__stamp {
   margin-left: auto;
   font-family: var(--font-marker);
@@ -1555,6 +1599,7 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   transform: rotate(-3deg);
 }
 .feedback--correct .feedback__stamp { color: var(--color-teal); border-color: var(--color-teal); }
+.feedback--partial .feedback__stamp { color: var(--color-orange); border-color: var(--color-orange); }
 .feedback--incorrect .feedback__stamp { color: var(--color-coral); border-color: var(--color-coral); }
 
 .feedback__timeline {

@@ -66,7 +66,7 @@
         </div>
         <div class="hud__group hud__group--right">
           <div class="hud__cell">
-            <span class="hud__label">Timer</span>
+            <span class="hud__label">Speed Bonus Timer</span>
             <span class="hud__value hud__value--timer" data-hud-timer>00:15</span>
           </div>
           <div class="hud__cell">
@@ -127,7 +127,7 @@
             <span class="btn__icon" aria-hidden="true">&#9670;</span>
             <span data-dd-label>Double Down &times;2</span>
           </button>
-          <button type="button" class="btn btn--lock" data-submit>Lock order &check;</button>
+          <button type="button" class="btn btn--lock" data-submit>Submit Answer &check;</button>
         </div>
       </div>
     </section>
@@ -149,6 +149,8 @@
           <h2 id="feedback-heading" class="feedback__title" data-feedback-title>Timeline locked</h2>
           <span class="feedback__stamp" data-feedback-stamp>Archive verified</span>
         </div>
+        <!-- Timeline rounds only: "2 / 3 relationships correct" -->
+        <p class="feedback__subtitle" data-feedback-subtitle hidden></p>
 
         <ol class="feedback__timeline" data-feedback-timeline></ol>
 

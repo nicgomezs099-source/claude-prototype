@@ -111,6 +111,11 @@
                  assets/images/cards/<id>.png  (see cardArtSrc()).
                  Drop a file there and it replaces the CSS fallback.
      `focus`   : optional object-position for cropping to the card window.
+     `versionLabel` : optional — disambiguates a remake/reboot/format when a
+                 title alone could mean more than one thing, e.g.
+                 { title: "Dune", versionLabel: "Villeneuve Film", year: 2021 }.
+                 Shown next to the title (never the year) only when present;
+                 no current item needs one yet. See titleWithVersion().
      ======================================================================== */
   var CONTENT_ITEMS = [
     // ---- general (themes: []) — not Horror or Sci-Fi, so these sit unused
@@ -665,6 +670,18 @@
     return title.replace(/^(the|a|an)\s+/i, "").charAt(0).toUpperCase();
   }
 
+  /* ---- titleWithVersion() -------------------------------------------------
+     A title, plus its `versionLabel` when the item has one — e.g. a remake,
+     a reboot, or a title that exists as both a film and a series ("Dune"
+     tagged versionLabel: "Villeneuve Film"). Only items that actually need
+     disambiguating carry a versionLabel; everything else renders exactly
+     as before. Never reveals the year. */
+  function titleWithVersion(item) {
+    return item.title + (item.versionLabel
+      ? ' <span class="version-label">(' + item.versionLabel + ')</span>'
+      : "");
+  }
+
   function prefersReducedMotion() {
     return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
@@ -692,18 +709,21 @@
 
   /* Round SHAPE: which challenge type, timer, size.
      4 ORDER · 2 BEFORE/AFTER · 2 INSERT · 2 QUOTE  (chronological stays 8/10).
-     Seconds scale with how much reading/deciding the round actually needs —
-     a 5-card ORDER round gets more time than a 2-title BEFORE/AFTER. */
+     STAGE A (post user-testing): Timeline (ORDER) rounds are always 3 cards
+     now — 4 and 5 cards were too much cognitive load, and are reserved for
+     a future Encore/Advanced mode. Timers below match the post-testing
+     table for every type EXCEPT before-after/insert, which keep their prior
+     15s — Stage B removes both from the Daily Run entirely. */
   var ROUND_PLAN = [
-    { type: "order",        seconds: 20, cards: 3 },
-    { type: "order",        seconds: 20, cards: 3 },
+    { type: "order",        seconds: 25, cards: 3 },
+    { type: "order",        seconds: 25, cards: 3 },
     { type: "quote",        seconds: 15 },
     { type: "before-after", seconds: 15 },
     { type: "insert",       seconds: 15, line: 3 },
-    { type: "order",        seconds: 25, cards: 4 },
+    { type: "order",        seconds: 25, cards: 3 },
     { type: "quote",        seconds: 15 },
     { type: "insert",       seconds: 15, line: 4 },
-    { type: "order",        seconds: 30, cards: 5 },
+    { type: "order",        seconds: 25, cards: 3 },
     { type: "before-after", seconds: 15 }
   ];
 
@@ -942,9 +962,21 @@
 
   function renderOrder(round, body) {
     text("[data-challenge-instruction]", "Oldest → Newest");
-    text("[data-submit]", "Lock order ✓");
+    text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", round.items.length + " Cards");
     text("[data-challenge-help]", "Drag the cards, or use Earlier / Later, to run oldest → newest.");
+
+    // persistent direction guide — user testing showed the "Oldest → Newest"
+    // heading alone wasn't enough; this sits right above the cards for as
+    // long as the round is on screen.
+    var direction = document.createElement("div");
+    direction.className = "timeline-direction";
+    direction.setAttribute("aria-hidden", "true");   // the heading + help text already say this to screen readers
+    direction.innerHTML =
+      '<span class="timeline-direction__end">Oldest · First</span>' +
+      '<span class="timeline-direction__line"><span class="timeline-direction__arrow">&rarr;</span></span>' +
+      '<span class="timeline-direction__end">Newest · Latest</span>';
+    body.appendChild(direction);
 
     var list = document.createElement("ol");
     list.className = "order-list";
@@ -974,7 +1006,7 @@
       '<div class="order-card__art poster" data-card-art>' + posterInner(item) +
         '<span class="order-card__mark" data-card-mark aria-hidden="true"></span>' +
       '</div>' +
-      '<p class="order-card__title">' + item.title + '</p>' +
+      '<p class="order-card__title">' + titleWithVersion(item) + '</p>' +
       yearTag(item) +
       '<div class="order-card__controls">' +
         '<button type="button" class="order-card__move" data-move="earlier">' +
@@ -1085,7 +1117,7 @@
   function renderBeforeAfter(round, body) {
     var tagText = round.label === "before" ? "BEFORE" : "AFTER";
     text("[data-challenge-instruction]", "Before or After?");
-    text("[data-submit]", "Lock answer ✓");
+    text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "2 Titles");
     text("[data-challenge-help]",
       "Which title came out " + (round.label === "before" ? "earlier" : "later") +
@@ -1134,7 +1166,7 @@
              '<div class="ba-card__art poster" data-card-art>' + posterInner(item) +
                '<span class="ba-card__mark" data-ba-mark aria-hidden="true"></span>' +
              '</div>' +
-             '<p class="ba-card__title">' + item.title + '</p>' +
+             '<p class="ba-card__title">' + titleWithVersion(item) + '</p>' +
              '<p class="meta ba-card__cat">' + item.category + '</p>' +
              yearTag(item) +
            '</button>';
@@ -1175,7 +1207,7 @@
 
   function renderInsert(round, body) {
     text("[data-challenge-instruction]", "Where Does It Fit?");
-    text("[data-submit]", "Lock answer ✓");
+    text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "Timeline");
     text("[data-challenge-help]",
       "Tap a gap to drop " + round.card.title + " into the timeline  ·  oldest → newest");
@@ -1187,7 +1219,7 @@
           '<div class="insert-card__art poster" data-card-art style="--card-color:' + genreColor(round.card.category) + '">' +
             posterInner(round.card) + '</div>' +
           '<div class="insert-card__info">' +
-            '<p class="insert-card__title">' + round.card.title + '</p>' +
+            '<p class="insert-card__title">' + titleWithVersion(round.card) + '</p>' +
             '<p class="meta">' + round.card.category + '</p>' +
             yearTag(round.card) +
           '</div>' +
@@ -1206,7 +1238,7 @@
         html +=
           '<li class="insert-item" style="--card-color:' + genreColor(it.category) + '">' +
             '<div class="insert-item__art poster" data-card-art>' + posterInner(it) + '</div>' +
-            '<p class="insert-item__title">' + it.title + '</p>' +
+            '<p class="insert-item__title">' + titleWithVersion(it) + '</p>' +
             yearTag(it) +
           '</li>';
       }
@@ -1256,7 +1288,7 @@
   function renderQuote(round, body) {
     var q = round.quote;
     text("[data-challenge-instruction]", "Name That Movie");
-    text("[data-submit]", "Lock answer ✓");
+    text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "Quote");
     text("[data-challenge-help]", "Which Movie or Series is this line from?  ·  keys 1 / 2 / 3");
 
@@ -1342,7 +1374,7 @@
     var t = gameState.timeRemaining;
     text("[data-hud-timer]", "00:" + ("0" + t).slice(-2));
     var bonus = calculateSpeedBonus(t);
-    text("[data-hud-speed]", bonus > 0 ? "+" + bonus : "No bonus");
+    text("[data-hud-speed]", bonus > 0 ? "+" + bonus : "No speed bonus");
     var challenge = $("[data-challenge]");
     if (challenge) challenge.classList.toggle("challenge--no-bonus", t === 0);
 
@@ -1487,35 +1519,54 @@
      LOCK ANSWER  —  check, score, feed back  (all three challenge types)
      ======================================================================== */
 
-  /* ---- checkOrderAnswer() --------------------------------------------------
-     Read the cards top-to-bottom / left-to-right and confirm the release
-     years never go backwards.                                              */
-  function checkOrderAnswer() {
+  /* ---- calculateTimelineAccuracy() -----------------------------------------
+     Timeline scoring is no longer all-or-nothing. Read the cards in their
+     current order and check every PAIR of cards (not just neighbours) —
+     for 3 cards, that's A-B, A-C, B-C, so 3 relationships total. Returns
+     how many of those pairs are in the right oldest→newest order.          */
+  function calculateTimelineAccuracy() {
     var cards = $all(".order-card", $("[data-order-list]"));
-    var years = cards.map(function (card) {
-      return itemById(card.getAttribute("data-id")).year;
-    });
-    for (var i = 1; i < years.length; i++) {
-      if (years[i] < years[i - 1]) return false;
+    var years = cards.map(function (card) { return itemById(card.getAttribute("data-id")).year; });
+    var total = 0, correct = 0;
+    for (var i = 0; i < years.length; i++) {
+      for (var j = i + 1; j < years.length; j++) {
+        total++;
+        if (years[i] <= years[j]) correct++;
+      }
     }
-    return true;
+    return { correct: correct, total: total };
   }
 
-  /* run the right checker for the current round's type */
+  /* ---- calculatePartialTimelineScore() -------------------------------------
+     3-card Timeline has exactly 3 relationships. Being one pair away from
+     perfect should still feel like "almost", so credit is front-loaded
+     toward a perfect order rather than a straight percentage.
+     (4/5-card Timeline is Encore-only for now and doesn't use this table.) */
+  var TIMELINE_SCORE_BY_CORRECT = { 3: 100, 2: 60, 1: 30, 0: 0 };
+  function calculatePartialTimelineScore(accuracy) {
+    if (accuracy.total === 3) return TIMELINE_SCORE_BY_CORRECT[accuracy.correct];
+    return Math.round((accuracy.correct / accuracy.total) * 100);   // fallback for other sizes
+  }
+
+  /* run the right checker for the current round's type (ORDER uses partial
+     accuracy instead — see calculateTimelineAccuracy()) */
   function checkAnswer(round) {
     if (round.type === "before-after") return checkBeforeAfterAnswer();
     if (round.type === "insert") return checkInsertAnswer();
     if (round.type === "quote") return checkQuoteAnswer();
-    return checkOrderAnswer();
+    return null;   // "order" is handled separately in lockAnswer()
   }
 
-  /* ---- calculateRoundScore() --------------------------------------------- */
-  function calculateRoundScore(isCorrect, speedBonus, doubleDown) {
-    if (!isCorrect) {
+  /* ---- calculateRoundScore() -----------------------------------------------
+     `basePoints` is 100 for a correct before-after/insert/quote, 0 for a
+     wrong one, or the 100/60/30/0 partial-Timeline score. Double Down only
+     multiplies the result AFTER that base (and any speed bonus) is set. */
+  function calculateRoundScore(basePoints, speedBonus, doubleDown) {
+    if (!basePoints) {
       return 0;
     }
 
-    var score = 100 + speedBonus;
+    var score = basePoints + speedBonus;
 
     if (doubleDown) {
       score = score * 2;
@@ -1547,8 +1598,21 @@
 
     var round = currentRound();
     var speedBonus = calculateSpeedBonus(gameState.timeRemaining);
-    var isCorrect = checkAnswer(round);
-    var roundScore = calculateRoundScore(isCorrect, speedBonus, gameState.doubleDown);
+
+    // Timeline (order) rounds get partial credit; every other type is still
+    // a plain right/wrong check. `isCorrect` always means "full credit" —
+    // that's what keeps a streak alive and counts toward Personal Best —
+    // a partial Timeline still scores points but doesn't extend the streak.
+    var accuracy = null, basePoints, isCorrect;
+    if (round.type === "order") {
+      accuracy = calculateTimelineAccuracy();
+      basePoints = calculatePartialTimelineScore(accuracy);
+      isCorrect = accuracy.correct === accuracy.total;
+    } else {
+      isCorrect = checkAnswer(round);
+      basePoints = isCorrect ? 100 : 0;
+    }
+    var roundScore = calculateRoundScore(basePoints, speedBonus, gameState.doubleDown);
 
     gameState.score += roundScore;
     if (isCorrect) {
@@ -1565,7 +1629,7 @@
     }
 
     renderHud();
-    showRoundFeedback(round, isCorrect, speedBonus, roundScore);
+    showRoundFeedback(round, isCorrect, speedBonus, roundScore, basePoints, accuracy);
   }
 
 
@@ -1573,7 +1637,7 @@
      FEEDBACK
      ======================================================================== */
 
-  function showRoundFeedback(round, isCorrect, speedBonus, roundScore) {
+  function showRoundFeedback(round, isCorrect, speedBonus, roundScore, basePoints, accuracy) {
     // lock the whole challenge body + reveal every year
     $all("[data-challenge-body] button").forEach(function (b) { b.disabled = true; });
     $all("[data-challenge-body] [draggable]").forEach(function (el) { el.setAttribute("draggable", "false"); });
@@ -1590,58 +1654,94 @@
     else if (round.type === "insert") correctSequence = revealInsert(round);
     else correctSequence = revealQuote(round);
 
+    // Timeline rounds have 3 states (correct / partial / incorrect); every
+    // other type stays the original 2 (correct / incorrect).
+    var state = "incorrect";
+    if (round.type === "order") {
+      state = accuracy.correct === accuracy.total ? "correct" : (accuracy.correct > 0 ? "partial" : "incorrect");
+    } else if (isCorrect) {
+      state = "correct";
+    }
+
     // the shared archive verification pop-up
     var fb = $("[data-feedback]");
-    fb.className = "feedback " + (isCorrect ? "feedback--correct" : "feedback--incorrect");
+    fb.className = "feedback feedback--" + state;
     fb.hidden = false;
 
-    // a wrong answer gives the pop-up a brief VHS-tracking wobble
-    if (!isCorrect) {
+    // anything short of a clean pass gives the pop-up a brief VHS-tracking wobble
+    if (state !== "correct") {
       var box = $(".feedback__box", fb);
       if (box) {
         box.classList.add("feedback__box--wrong");
         window.setTimeout(function () { box.classList.remove("feedback__box--wrong"); }, 500);
       }
     }
-    text("[data-feedback-mark]", isCorrect ? "✓" : "✕");
-    text("[data-feedback-title]", isCorrect ? FEEDBACK_TITLE[round.type] : FEEDBACK_TITLE_WRONG[round.type]);
-    text("[data-feedback-stamp]", isCorrect ? "Archive verified" : "Please rewind");
+
+    var markByState = { correct: "✓", partial: "±", incorrect: "✕" };
+    text("[data-feedback-mark]", markByState[state]);
+
+    var titleText = round.type === "order"
+      ? TIMELINE_FEEDBACK_TITLE[accuracy.correct]
+      : (isCorrect ? FEEDBACK_TITLE[round.type] : FEEDBACK_TITLE_WRONG[round.type]);
+    text("[data-feedback-title]", titleText);
+    text("[data-feedback-stamp]", state === "correct" ? "Archive verified" : "Please rewind");
+
+    // "2 / 3 relationships correct" — Timeline only
+    var subtitle = $("[data-feedback-subtitle]");
+    if (subtitle) {
+      if (round.type === "order") {
+        subtitle.hidden = false;
+        subtitle.textContent = accuracy.correct + " / " + accuracy.total + " relationships correct";
+      } else {
+        subtitle.hidden = true;
+      }
+    }
 
     var timeline = $("[data-feedback-timeline]");
     timeline.innerHTML = "";
     correctSequence.forEach(function (it) {
       var li = document.createElement("li");
-      li.innerHTML = '<span>' + it.title + '</span><strong>' + it.year + '</strong>';
+      li.innerHTML = '<span>' + titleWithVersion(it) + '</span><strong>' + it.year + '</strong>';
       timeline.appendChild(li);
     });
 
-    text("[data-bd-base]", isCorrect ? "+100" : "+0");
-    text("[data-bd-speed]", isCorrect ? "+" + speedBonus : "+0");
+    text("[data-bd-base]", "+" + basePoints);
+    text("[data-bd-speed]", basePoints > 0 ? "+" + speedBonus : "+0");
     $("[data-bd-dd-row]").hidden = !gameState.doubleDown;
     text("[data-bd-total]", "+" + roundScore);
 
     text("[data-feedback-streak]", isCorrect ? "Streak ×" + gameState.streak : "Streak reset");
     text("[data-next]", gameState.round >= 10 ? "See results →" : "Next challenge →");
 
-    announce((isCorrect ? "Correct. " : "Out of order. ") +
-      "Round score " + roundScore + ". Streak " + gameState.streak + ".");
+    var announceMsg = round.type === "order"
+      ? titleText + ". " + accuracy.correct + " of " + accuracy.total + " relationships correct. "
+      : (isCorrect ? "Correct. " : "Out of order. ");
+    announce(announceMsg + "Round score " + roundScore + ". Streak " + gameState.streak + ".");
 
     // move focus into the pop-up so keyboard players land on "Next challenge"
     var next = $("[data-next]");
     if (next) next.focus();
   }
 
+  /* "order" isn't here — Timeline always uses TIMELINE_FEEDBACK_TITLE below now. */
   var FEEDBACK_TITLE = {
-    "order": "Timeline locked",
     "before-after": "Called it",
     "insert": "Slotted in",
     "quote": "Nice catch"
   };
   var FEEDBACK_TITLE_WRONG = {
-    "order": "Out of order",
     "before-after": "Wrong call",
     "insert": "Wrong slot",
     "quote": "Wrong tape"
+  };
+
+  /* Timeline feedback title, keyed by how many of the 3 relationships were
+     correct — see calculateTimelineAccuracy(). */
+  var TIMELINE_FEEDBACK_TITLE = {
+    3: "Perfect order",
+    2: "Almost there",
+    1: "Partial match",
+    0: "Out of order"
   };
 
   /* mark the quote options; return the correct title (with its year) for the strip */
