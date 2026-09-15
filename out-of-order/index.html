@@ -69,6 +69,18 @@
         <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
         <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
       </div>
+      <p class="meta home__cta-note">New tape every day &middot; new theme &middot; new challenges</p>
+
+      <!-- Beta Theme switcher — hidden unless the URL has ?beta=true.
+           This is the ONLY way to change the edition; the shelf below is
+           decorative for everyone. -->
+      <div class="beta-theme" data-beta-theme hidden>
+        <span class="meta beta-theme__label">Beta Theme &middot; testers only</span>
+        <div class="beta-theme__buttons">
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="horror" aria-pressed="false">Horror</button>
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="sci-fi" aria-pressed="false">Sci-Fi</button>
+        </div>
+      </div>
 
       <!-- personal best -->
       <section class="best" aria-labelledby="best-heading">
@@ -83,7 +95,7 @@
       <div class="home__archive-shelf">
         <p class="meta">O.O. Video Archive &middot; Shelf A</p>
         <div class="shelf__wrap">
-          <div class="shelf" data-shelf role="group" aria-label="Archive shelf — pick an edition to preview"></div>
+          <div class="shelf" data-shelf role="group" aria-label="Archive shelf — today's tape is highlighted"></div>
         </div>
         <span class="tape-label tape-label--cream">Be kind. Rewind. &#9786;</span>
       </div>
@@ -104,7 +116,7 @@
       <h2 id="archive-heading" class="sr-only">Today's archive</h2>
 
       <div class="vhs-case">
-        <span class="tape-label tape-label--archive tape-label--stuck">Today's Archive</span>
+        <span class="tape-label tape-label--archive tape-label--stuck">Today's Tape</span>
 
         <div class="vhs-case__poster">
           <!-- JS fills the theme; CSS draws the fallback; a real image layers on top if it loads -->
@@ -119,6 +131,8 @@
         <div class="vhs-case__info">
           <p class="meta vhs-case__date" data-today-date>Wed &middot; Sep 2</p>
           <p class="vhs-case__theme" data-theme-name>Horror</p>
+          <p class="vhs-case__tagline">A new genre every day</p>
+          <p class="meta vhs-case__mix">7 themed challenges &middot; 3 Archive Wildcards</p>
           <p class="meta vhs-case__motifs" data-theme-motifs>Static &middot; Moons &middot; Shadows</p>
 
           <div class="vhs-case__facts">

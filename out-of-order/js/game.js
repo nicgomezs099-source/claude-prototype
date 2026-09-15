@@ -457,14 +457,23 @@
      THEME
      ======================================================================== */
 
-  /* Pick today's theme deterministically.
-     A "?theme=<id>" URL parameter can force any edition — handy for previewing
-     and for the class demo. Without it, the theme is chosen by the date. */
+  /* Pick today's theme deterministically. Checked in order:
+       1. "?theme=<id>" URL param        — always works, handy for the class demo
+       2. the Beta Theme switcher's pick — only possible in ?beta=true mode
+       3. the date                       — what every normal player sees
+     Normal players never see #1 or #2 as a button; only the calendar
+     decides their theme. */
   function getDailyTheme(date) {
     var forced = new URLSearchParams(window.location.search).get("theme");
     if (forced) {
       for (var i = 0; i < THEMES.length; i++) {
         if (THEMES[i].id === forced) return THEMES[i];
+      }
+    }
+    var betaPick = getBetaThemeOverride();
+    if (betaPick) {
+      for (var j = 0; j < THEMES.length; j++) {
+        if (THEMES[j].id === betaPick) return THEMES[j];
       }
     }
     var d = date || new Date();
@@ -513,15 +522,86 @@
       loadPosterImage(el, theme.hero);
     });
 
-    // reflect the active edition on the shelf switch buttons
-    $all("[data-theme-switch]").forEach(function (btn) {
-      btn.setAttribute("aria-pressed", String(btn.getAttribute("data-theme-switch") === theme.id));
+    // mark which shelf tape is the one actually playing right now — the
+    // shelf itself is decorative (see renderShelf()); this is the only
+    // thing on it that changes.
+    $all("[data-theme-tape]").forEach(function (spine) {
+      var isPlaying = spine.getAttribute("data-theme-tape") === theme.id;
+      spine.classList.toggle("spine--today", isPlaying);
+      var tag = $("[data-spine-tag]", spine);
+      if (tag) tag.textContent = isPlaying ? "Playing Today" : "VHS";
     });
 
     // "Start today's run" must launch the SAME edition Home is showing right
     // now — otherwise picking Sci-Fi here and pressing Play could still land
     // on whatever edition game.html falls back to (today's date rotation).
     $all("[data-start-run]").forEach(function (a) { a.setAttribute("href", "game.html?theme=" + theme.id); });
+  }
+
+
+  /* ==========================================================================
+     BETA MODE  —  a Horror/Sci-Fi switcher for user testing only
+     Normal players get exactly one theme a day, chosen by the calendar —
+     see getDailyTheme(). Adding "?beta=true" to the URL reveals a small,
+     clearly-labelled switcher (renderBetaThemeSwitcher()) so a tester can
+     see both complete editions without waiting for the calendar.
+     ======================================================================== */
+  var BETA_THEME_KEY = "outOfOrderBetaTheme";
+
+  function isBetaMode() {
+    return new URLSearchParams(window.location.search).get("beta") === "true";
+  }
+
+  /* the tester's manual pick, or null outside beta mode / before any pick.
+     Kept in sessionStorage (not localStorage) — it's a per-visit testing
+     aid, not something that should outlive the tab or affect a normal run. */
+  function getBetaThemeOverride() {
+    if (!isBetaMode()) return null;
+    try { return window.sessionStorage.getItem(BETA_THEME_KEY); } catch (e) { return null; }
+  }
+
+  function setBetaThemeOverride(themeId) {
+    try { window.sessionStorage.setItem(BETA_THEME_KEY, themeId); } catch (e) { /* ignore */ }
+  }
+
+  /* Console helper for testers: clears the beta theme pick, the collection,
+     tokens-era personal-best record, and Beta My Archive progress, so the
+     next run starts completely fresh. Run resetBetaData() from devtools. */
+  function resetBetaData() {
+    try {
+      window.sessionStorage.removeItem(BETA_THEME_KEY);
+      window.localStorage.removeItem(BEST_KEY);
+      window.localStorage.removeItem(COLLECTION_KEY);
+    } catch (e) { /* ignore — nothing to clear */ }
+    return "Beta data reset. Reload the page.";
+  }
+  window.resetBetaData = resetBetaData;   // the only thing this game puts on `window` — a devtools convenience
+
+  /* Build (once) and keep in sync the small "Beta Theme" switcher shown
+     only in ?beta=true mode — Home page only, before a run starts. */
+  function renderBetaThemeSwitcher(date) {
+    var box = $("[data-beta-theme]");
+    if (!box || !isBetaMode()) return;
+    box.hidden = false;
+
+    function refreshButtons() {
+      var current = getDailyTheme(date).id;
+      $all("[data-beta-theme-btn]", box).forEach(function (btn) {
+        btn.setAttribute("aria-pressed", String(btn.getAttribute("data-beta-theme-btn") === current));
+      });
+    }
+
+    $all("[data-beta-theme-btn]", box).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-beta-theme-btn");
+        setBetaThemeOverride(id);
+        var theme = THEMES.filter(function (t) { return t.id === id; })[0];
+        if (theme) applyTheme(theme, date);
+        refreshButtons();
+      });
+    });
+
+    refreshButtons();
   }
 
   /* Find the theme whose name matches a shelf category (case-insensitive). */
@@ -535,9 +615,11 @@
 
   /* ==========================================================================
      SHELF  —  category tapes on the Home page
-     One spine per category. A category that has a matching theme (Horror,
-     Sci-Fi) is rendered as a <button> that switches the page to that edition;
-     the rest are plain decorative tapes.
+     Every spine is purely decorative — normal players can't pick a theme,
+     only see that a rotating catalogue exists. The one matching today's
+     edition gets a "Playing Today" tag and stands out visually (see
+     applyTheme(), which flips that on/off, and the Beta Theme switcher for
+     testers who DO need to change it — section 25/28 of the redesign).
      ======================================================================== */
   function renderShelf(date) {
     var shelf = $("[data-shelf]");
@@ -545,22 +627,16 @@
 
     CATEGORIES.forEach(function (cat) {
       var theme = themeForCategory(cat.name);
-      var spine = document.createElement(theme ? "button" : "div");
+      var spine = document.createElement("div");
 
-      spine.className = "spine" + (cat.ink ? " spine--ink" : "") + (theme ? " spine--switch" : "");
+      spine.className = "spine" + (cat.ink ? " spine--ink" : "");
       spine.style.setProperty("--spine-color", cat.color);
       spine.innerHTML =
         '<span class="spine__icon" aria-hidden="true">' + (ICONS[cat.icon] || ICONS.film) + '</span>' +
         '<span class="spine__title">' + cat.name + '</span>' +
-        '<span class="spine__tag">VHS</span>';
+        '<span class="spine__tag" data-spine-tag>VHS</span>';
 
-      if (theme) {
-        spine.type = "button";
-        spine.setAttribute("data-theme-switch", theme.id);
-        spine.setAttribute("aria-pressed", "false");
-        spine.setAttribute("aria-label", "Switch to the " + cat.name + " edition");
-        spine.addEventListener("click", function () { applyTheme(theme, date); });
-      }
+      if (theme) spine.setAttribute("data-theme-tape", theme.id);
 
       shelf.appendChild(spine);
     });
@@ -812,46 +888,66 @@
 
   /* ---- Daily Theme content ------------------------------------------------
      getThemeChallengePool() = every title tagged with the active theme.
-     Every round draws ONLY from this pool — a Horror run never shows a
-     Sci-Fi-only title, and vice versa, so the theme actually means
-     something. Both pools are large enough (35+ titles) that a single
-     10-round run never has to repeat a title.                                */
+     A Horror run never shows a Sci-Fi-only title (or vice versa) — the
+     "Archive Wildcard" rounds below pull from the GENERAL pool instead
+     (themes: []), never from the other edition, so the theme still always
+     means something.                                                        */
   function getThemeChallengePool(themeId) {
     return CONTENT_ITEMS.filter(function (it) { return it.themes.indexOf(themeId) !== -1; });
   }
 
+  /* pick which 3 of the round-plan's "content" rounds (Order / Quote /
+     Which Came First — the only types with a general-content fallback) are
+     Archive Wildcards today. Odd One Out and Pixel Scene are never
+     wildcards; they don't have a general-content pool to draw from. */
+  function selectWildcardRounds(rng) {
+    var eligible = [];
+    ROUND_PLAN.forEach(function (plan, idx) {
+      if (plan.type === "order" || plan.type === "quote" || plan.type === "which-first") eligible.push(idx);
+    });
+    var picks = shuffleArr(eligible, rng).slice(0, Math.min(3, eligible.length));
+    var map = {};
+    picks.forEach(function (idx) { map[idx] = true; });
+    return map;
+  }
+
   /* ---- generateDailyRun() ----------------------------------------------
      Same round SHAPE for everyone every day; the DATE + the active theme
-     seed which titles fill each round. Horror and Sci-Fi draw from
-     different pools, so the two editions never play the same 10 rounds.      */
+     seed which titles fill each round, and which 3 rounds are Archive
+     Wildcards (general content — 70% themed / 30% wildcard, per round 27
+     of the redesign brief).                                                 */
   function generateDailyRun(date) {
     var themeId = getDailyTheme(date).id;
     var rng = mulberry32(dayNumber(date) * 2654435761 + stringSeed(themeId));
+    var wildRounds = selectWildcardRounds(rng);
 
     var pool      = shuffleArr(getThemeChallengePool(themeId), rng);
+    var wildPool  = shuffleArr(CONTENT_ITEMS.filter(function (it) { return it.themes.length === 0; }), rng);
     var qPool     = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; }), rng);
+    var wildQPool = shuffleArr(QUOTE_CHALLENGES.filter(function (q) { return q.themes.length === 0; }), rng);
     var scenePool = shuffleArr(PIXEL_SCENES.filter(function (s) { return s.themes.indexOf(themeId) !== -1; }), rng);
     var oooPool   = shuffleArr(ODD_ONE_OUT.filter(function (s) { return s.themes.indexOf(themeId) !== -1; }), rng);
-    var pi = 0, qi = 0, sci = 0, ooi = 0;
+    var pi = 0, wi = 0, qi = 0, wqi = 0, sci = 0, ooi = 0;
 
-    function nextItem() {
-      if (pi >= pool.length) pi = 0;   // safety net — the pools are sized not to need this
+    function nextItem(wild) {
+      if (wild) { if (wi >= wildPool.length) wi = 0; return wildPool[wi++]; }
+      if (pi >= pool.length) pi = 0;   // safety net — the themed pools are sized not to need this
       return pool[pi++];
     }
-    function takeItems(n) {
+    function takeItems(n, wild) {
       var out = [];
-      for (var i = 0; i < n; i++) { var it = nextItem(); if (it) out.push(it); }
+      for (var i = 0; i < n; i++) { var it = nextItem(wild); if (it) out.push(it); }
       return out;
     }
-    function nextQuote() {
+    function nextQuote(wild) {
+      if (wild) { if (wqi >= wildQPool.length) wqi = 0; return wildQPool[wqi++]; }
       if (qi >= qPool.length) qi = 0;
       return qPool[qi++];
     }
-    /* null when no Pixel Scene artwork has been supplied for this theme yet */
     /* unlike the other pools, this one does NOT wrap around — with only a
        couple of scenes per theme so far, wrapping would show the same
        scene twice in one run. Once exhausted, the caller falls back to an
-       extra Quote round instead (see below). */
+       extra (themed) Quote round instead (see below). */
     function nextScene() {
       if (sci >= scenePool.length) return null;
       return scenePool[sci++];
@@ -863,28 +959,31 @@
     }
     function buildOddOneOutRound() {
       var set = nextOddOneOutSet();
-      if (!set) return { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };  // last-resort fallback
+      if (!set) return { type: "quote", quote: nextQuote(false) || QUOTE_CHALLENGES[0] };  // last-resort fallback
       return { type: "odd-one-out", set: set, items: shuffleArr(set.items.map(itemById), rng) };
     }
 
-    return ROUND_PLAN.map(function (plan) {
+    return ROUND_PLAN.map(function (plan, idx) {
+      var wild = !!wildRounds[idx];
       var extra;
 
       if (plan.type === "quote") {
-        extra = { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
+        extra = { type: "quote", quote: nextQuote(wild) || QUOTE_CHALLENGES[0] };
       } else if (plan.type === "which-first") {
-        var pair = pickWidestGapPair(takeItems(3), rng);
+        var pair = pickWidestGapPair(takeItems(3, wild), rng);
         extra = { type: "which-first", itemA: pair[0], itemB: pair[1] };
       } else if (plan.type === "odd-one-out") {
-        extra = buildOddOneOutRound();
+        extra = buildOddOneOutRound();   // never a wildcard — see selectWildcardRounds()
+        wild = false;
       } else if (plan.type === "pixel-scene") {
         // once this theme's scenes run out (still just 2 each today) ->
-        // fall back to an extra Quote round instead of repeating one
+        // fall back to an extra themed Quote round instead of repeating one
         var scene = nextScene();
-        extra = scene ? { type: "pixel-scene", scene: scene } : { type: "quote", quote: nextQuote() || QUOTE_CHALLENGES[0] };
+        extra = scene ? { type: "pixel-scene", scene: scene } : { type: "quote", quote: nextQuote(false) || QUOTE_CHALLENGES[0] };
+        wild = false;   // Pixel Scene is never a wildcard either
       } else if (plan.type === "insert") {
         // kept for a future Encore mode — not reachable from ROUND_PLAN today
-        var set = takeItems(plan.line + 1).slice().sort(function (a, b) { return a.year - b.year; });
+        var set = takeItems(plan.line + 1, wild).slice().sort(function (a, b) { return a.year - b.year; });
         var k = 1 + Math.floor(rng() * Math.max(1, set.length - 2));
         var card = set[k];
         var line = set.filter(function (it) { return it !== card; });
@@ -893,11 +992,12 @@
           correctSlot: line.filter(function (it) { return it.year < card.year; }).length
         };
       } else {
-        extra = { type: "order", items: presentOrder(takeItems(plan.cards)) };
+        extra = { type: "order", items: presentOrder(takeItems(plan.cards, wild)) };
       }
 
       extra.seconds = plan.seconds;
       extra.theme = themeId;
+      extra.wildcard = wild;
       return extra;
     });
   }
@@ -1006,6 +1106,14 @@
     var nn = ("0" + gameState.round).slice(-2);
     var tag = (round.type === "quote" ? "Quote Archive" : "Today's Archive") + " · Round " + nn;
     text("[data-challenge-tag]", tag);
+
+    // Odd One Out and Pixel Scene are always on-theme (no general-content
+    // pool exists for them yet), so only the other types can be wildcards.
+    var badge = $("[data-challenge-badge]");
+    if (badge) {
+      badge.textContent = round.wildcard ? "Archive Wildcard" : "Themed Round";
+      badge.classList.toggle("challenge__badge--wildcard", !!round.wildcard);
+    }
 
     if (round.type === "order") renderOrder(round, body);
     else if (round.type === "insert") renderInsert(round, body);
@@ -2197,6 +2305,7 @@
       renderSpotlight();
       renderPersonalBest();
       renderCollectionGrid();
+      renderBetaThemeSwitcher(today);   // no-op unless ?beta=true
     }
 
     applyTheme(theme, today);     // ...then apply the theme so it can mark the active spine

@@ -540,22 +540,14 @@ main {
 .spine--ink { color: var(--color-ink); }
 .spine--ink .spine__tag { border-color: rgba(20, 20, 20, 0.5); }
 
-/* a spine that switches the page to its edition — a real <button> */
-.spine--switch {
-  appearance: none;
-  -webkit-appearance: none;
-  font: inherit;
-  cursor: pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-}
-.spine--switch:hover,
-.spine--switch:focus-visible { transform: translateY(-8px); }        /* pulls out like a tape */
-.spine--switch[aria-pressed="true"] {
-  transform: translateY(-12px);
+/* the tape matching TODAY's edition — pulled out and outlined, like it's
+   already queued up in the machine. The shelf is decorative for everyone
+   (see renderShelf()); this is the only thing that changes on it. */
+.spine--today {
+  transform: translateY(-10px);
   box-shadow: 0 0 0 3px var(--color-ink), 0 12px 18px rgba(20, 20, 20, 0.3);
 }
-/* the active edition's "VHS" tag flips to a filled marker */
-.spine--switch[aria-pressed="true"] .spine__tag {
+.spine--today .spine__tag {
   background: var(--color-ink);
   color: #fff;
   border-color: var(--color-ink);
@@ -618,6 +610,13 @@ main {
   color: var(--theme-primary);
   margin-top: var(--space-1);
 }
+.vhs-case__tagline {
+  font-family: var(--font-marker);
+  font-size: 1rem;
+  color: rgba(247, 239, 221, 0.9);
+  margin-top: 2px;
+}
+.vhs-case__mix { color: rgba(247, 239, 221, 0.6); margin-bottom: var(--space-1); }
 .vhs-case__motifs { color: rgba(247, 239, 221, 0.75); }
 .vhs-case__facts {
   display: flex;
@@ -762,6 +761,34 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 }
 
 .home__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.home__cta-note { margin-top: 0.5rem; color: rgba(20, 20, 20, 0.6); }
+
+/* ---- Beta Theme switcher — testers only, hidden unless ?beta=true ---- */
+.beta-theme {
+  margin-top: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 2px dashed rgba(20, 20, 20, 0.35);
+  border-radius: 8px;
+  max-width: 460px;
+}
+.beta-theme__label { color: rgba(20, 20, 20, 0.6); flex-basis: 100%; }
+.beta-theme__buttons { display: flex; gap: 0.5rem; }
+.beta-theme__btn {
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.beta-theme__btn[aria-pressed="true"] { background: var(--color-ink); color: #fff; }
 
 /* Personal best box */
 .best {
@@ -950,6 +977,19 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
   border: 1px solid var(--color-ink);
   border-radius: var(--radius-pill);
   padding: 2px 10px;
+}
+/* Themed Round (theme accent) vs Archive Wildcard (neutral) — explains why
+   an off-theme title can show up during today's edition */
+.challenge__badge {
+  border: 1px solid var(--theme-primary);
+  color: var(--theme-primary);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-weight: 700;
+}
+.challenge__badge--wildcard {
+  border-color: rgba(20, 20, 20, 0.4);
+  color: rgba(20, 20, 20, 0.6);
 }
 
 .challenge__instruction {
