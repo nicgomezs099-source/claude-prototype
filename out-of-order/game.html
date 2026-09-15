@@ -52,7 +52,7 @@
       <div class="hud__row">
         <div class="hud__group">
           <div class="hud__cell">
-            <span class="hud__label">Round</span>
+            <span class="hud__label" data-hud-round-label>Round</span>
             <span class="hud__value" data-hud-round>01 / 10</span>
           </div>
           <div class="hud__cell">
@@ -176,7 +176,7 @@
          RESULTS  —  after round 10 (hidden by default)
          ============================================================ -->
     <section class="results" data-results hidden aria-labelledby="results-heading">
-      <h1 id="results-heading" class="results__heading">Daily run complete</h1>
+      <h1 id="results-heading" class="results__heading">Daily Tape Complete</h1>
 
       <p class="results__new-best tape-label tape-label--red" data-new-best hidden>New personal best!</p>
 
@@ -190,9 +190,29 @@
         <li><span>Fastest answer</span><strong data-results-fastest>&mdash;</strong></li>
       </ul>
 
+      <!-- round-by-round outcome, left = round 1 -->
+      <ol class="results__breakdown" data-results-breakdown aria-label="Round-by-round breakdown"></ol>
+
       <p class="results__title-award" data-results-award>Casual Viewer</p>
 
-      <!-- shown only when this run's score crossed a collectible's threshold -->
+      <!-- Archive Tokens earned this run + running balance -->
+      <div class="results__tokens">
+        <p class="meta results__tokens-label">Run Reward</p>
+        <p class="results__tokens-earned">
+          <img class="results__token-icon" src="assets/images/token.png" alt="" aria-hidden="true">
+          +<span data-tokens-earned>25</span> Archive Tokens
+        </p>
+        <p class="meta">Current balance: <strong data-tokens-balance>25</strong></p>
+
+        <!-- shown only once the balance covers a Mystery Tape and a
+             collectible is still locked -->
+        <div class="results__mystery-tape" data-mystery-tape hidden>
+          <p class="results__mystery-ready">Mystery Tape Ready</p>
+          <button type="button" class="btn btn--primary" data-open-tape>Open Tape &rarr;</button>
+        </div>
+      </div>
+
+      <!-- shown once a Mystery Tape has been opened this run -->
       <div class="results__unlocked" data-results-unlocked hidden>
         <p class="meta results__unlocked-label">New in My Archive</p>
         <div class="results__unlocked-items" data-results-unlocked-items></div>
@@ -211,6 +231,36 @@
         <a class="btn btn--ghost" href="index.html">Back to home</a>
       </div>
       <p class="results__copied" data-copied hidden>&check; Score copied</p>
+
+      <!-- optional continued play — the Daily Run above is already the
+           official, comparable score -->
+      <div class="results__encore">
+        <p class="meta">Want to keep playing?</p>
+        <button type="button" class="btn btn--ghost" data-start-encore>Start Encore Mode &rarr;</button>
+        <p class="meta results__encore-note">3 lives &middot; gets harder as you go &middot; today's score is already locked in</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ENCORE RESULTS  —  shown when Encore Mode ends (hidden by default)
+         ============================================================ -->
+    <section class="results" data-encore-results hidden aria-labelledby="encore-results-heading">
+      <h1 id="encore-results-heading" class="results__heading">Encore Over</h1>
+
+      <p class="results__score" data-encore-score>0</p>
+      <p class="results__score-label">Encore points</p>
+
+      <ul class="results__stats">
+        <li><span>Rounds played</span><strong data-encore-rounds>0</strong></li>
+        <li><span>Tokens earned</span><strong data-encore-tokens>+0</strong></li>
+      </ul>
+
+      <p class="meta results__tokens-label">Archive Tokens balance</p>
+      <p class="results__score results__score--sub" data-encore-balance>0</p>
+
+      <div class="results__actions">
+        <a class="btn btn--ghost" href="index.html">Back to home</a>
+      </div>
     </section>
 
     <!-- ============================================================

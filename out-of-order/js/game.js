@@ -73,14 +73,17 @@
 
   /* ==========================================================================
      DATA  —  MY ARCHIVE COLLECTIBLES  (Beta)
-     Score a high enough round to unlock one for good. Only 2 exist in this
-     Beta build; the rest of the 12-slot shelf stays locked "coming soon" —
-     never claim the archive is "complete".
+     Unlocked by spending Archive Tokens on a Mystery Tape (see
+     openMysteryTape()) — in array order, so the first Mystery Tape you open
+     always reveals Neo, the second always reveals the Lamp. Only 2 exist in
+     this Beta build; the rest of the 12-slot shelf stays locked "coming
+     soon" — never claim the archive is "complete".
      ======================================================================== */
   var COLLECTIBLES = [
-    { id: "neo",  name: "Neo",      hint: "The Matrix", threshold: 600, image: "assets/images/collectibles/neo.png" },
-    { id: "lamp", name: "The Lamp", hint: "Wish granted", threshold: 850, image: "assets/images/collectibles/lamp.png" }
+    { id: "neo",  name: "Neo",      hint: "The Matrix",   image: "assets/images/collectibles/neo.png" },
+    { id: "lamp", name: "The Lamp", hint: "Wish granted", image: "assets/images/collectibles/lamp.png" }
   ];
+  var MYSTERY_TAPE_COST = 50;   // Archive Tokens needed to open one
   var ARCHIVE_SLOTS = 12;   // total shelf size the grid always shows
 
 
@@ -390,12 +393,28 @@
     doubleDownsWon: 0,
     fastestAnswer: null,     // fewest seconds taken to answer a round
     powerUps: { extraTime: 0, reveal: 0 },   // charges currently held
-    run: []                  // the 10 generated rounds
+    run: [],                 // the 10 generated rounds
+    roundResults: []         // one {type, state, wildcard} per Daily Run round, for the Results breakdown
   };
 
   // once a power-up has been unlocked it stays available (a later streak reset
   // does not take the charge away) — this just stops it being granted twice.
   var powerUpsUnlocked = { extraTime: false, reveal: false };
+
+  /* Encore Mode — optional bonus play after the Daily Run. Separate from
+     gameState: the Daily Run's score/stats stay exactly as they were when
+     Round 10 ended, since that's the official, comparable score. */
+  var ENCORE_LIVES = 3;
+  var ENCORE_STAGE_EVERY = 4;         // rounds played before the next difficulty stage
+  var ENCORE_TOKENS_PER_CORRECT = 2;
+  var encoreState = {
+    active: false,
+    lives: 0,
+    score: 0,
+    tokensEarned: 0,
+    stage: 1,                // 1 = 3-card Timeline, 2 = 4-card, 3 = 5-card + Insert
+    roundsPlayed: 0
+  };
 
   var timerId = null;        // setInterval handle for the soft timer
   var countdownId = null;    // setTimeout handle for the 3-2-1 intro
@@ -698,20 +717,65 @@
     catch (err) { /* ignore — nothing to persist to */ }
   }
 
-  /* Compare a just-finished run's score against every collectible's
-     threshold; unlock (and persist) any new ones; return the list earned
-     just now so Results can show "New in My Archive". */
-  function checkCollectibleUnlocks(score) {
+  function hasLockedCollectible() {
     var unlocked = loadCollection();
-    var justUnlocked = [];
-    COLLECTIBLES.forEach(function (c) {
-      if (!unlocked[c.id] && score >= c.threshold) {
-        unlocked[c.id] = true;
-        justUnlocked.push(c);
-      }
-    });
-    if (justUnlocked.length) saveCollection(unlocked);
-    return justUnlocked;
+    return COLLECTIBLES.some(function (c) { return !unlocked[c.id]; });
+  }
+
+  /* ==========================================================================
+     STORAGE  —  Archive Tokens (the game's one and only currency)
+     ======================================================================== */
+  var TOKENS_KEY = "outOfOrderTokens";
+
+  function loadTokens() {
+    try {
+      var raw = window.localStorage.getItem(TOKENS_KEY);
+      var n = raw ? parseInt(raw, 10) : 0;
+      return isNaN(n) ? 0 : n;
+    } catch (err) {
+      return 0;
+    }
+  }
+
+  function saveTokens(n) {
+    try { window.localStorage.setItem(TOKENS_KEY, String(Math.max(0, n))); }
+    catch (err) { /* ignore — nothing to persist to */ }
+  }
+
+  /* add `n` tokens to the balance and return the new total */
+  function addTokens(n) {
+    var total = loadTokens() + n;
+    saveTokens(total);
+    return total;
+  }
+
+  /* ---- calculateRunTokens() -------------------------------------------
+     Simple on purpose: a flat completion reward, a small bonus per correct
+     answer, and a bigger one-time bonus for a new Personal Best. */
+  function calculateRunTokens(correctCount, isNewBest) {
+    var tokens = 25;                    // completion reward
+    tokens += correctCount * 5;         // performance bonus — up to +50 for 10/10
+    if (isNewBest) tokens += 15;        // new Personal Best bonus
+    return tokens;
+  }
+
+  /* Spend a Mystery Tape (MYSTERY_TAPE_COST tokens) to reveal the next
+     locked collectible, in COLLECTIBLES order — not random, so a tester
+     always sees a payoff instead of "nothing" (there are only 2 items in
+     this Beta). Returns the newly-unlocked collectible, or null if the
+     balance is short or nothing is left to find. */
+  function openMysteryTape() {
+    var balance = loadTokens();
+    if (balance < MYSTERY_TAPE_COST) return null;
+
+    var unlocked = loadCollection();
+    var next = COLLECTIBLES.filter(function (c) { return !unlocked[c.id]; })[0];
+    if (!next) return null;
+
+    saveTokens(balance - MYSTERY_TAPE_COST);
+    unlocked[next.id] = true;
+    saveCollection(unlocked);
+    return next;
   }
 
   /* Render the 12-slot "My Archive" shelf on the Home page: the 2 real
@@ -750,6 +814,7 @@
 
     text("[data-collection-status]",
       foundCount + " Beta item" + (foundCount === 1 ? "" : "s") + " found — more coming soon.");
+    text("[data-tokens-home-balance]", loadTokens().toLocaleString());
   }
 
   /* ==========================================================================
@@ -1125,8 +1190,9 @@
     pixelSceneChoice = null;
     revealedYearIds = [];
 
-    var nn = ("0" + gameState.round).slice(-2);
-    var tag = (round.type === "quote" ? "Quote Archive" : "Today's Archive") + " · Round " + nn;
+    var roundNum = encoreState.active ? encoreState.roundsPlayed + 1 : gameState.round;
+    var nn = ("0" + roundNum).slice(-2);
+    var tag = (encoreState.active ? "Encore" : (round.type === "quote" ? "Quote Archive" : "Today's Archive")) + " · Round " + nn;
     text("[data-challenge-tag]", tag);
 
     // Odd One Out and Pixel Scene are always on-theme (no general-content
@@ -1146,8 +1212,15 @@
   }
 
   function renderHud() {
-    text("[data-hud-round]", ("0" + gameState.round).slice(-2) + " / 10");
-    text("[data-hud-score]", gameState.score.toLocaleString());
+    if (encoreState.active) {
+      text("[data-hud-round-label]", "Lives");
+      text("[data-hud-round]", "♥".repeat(encoreState.lives) + "♡".repeat(ENCORE_LIVES - encoreState.lives));
+      text("[data-hud-score]", encoreState.score.toLocaleString());
+    } else {
+      text("[data-hud-round-label]", "Round");
+      text("[data-hud-round]", ("0" + gameState.round).slice(-2) + " / 10");
+      text("[data-hud-score]", gameState.score.toLocaleString());
+    }
     text("[data-hud-streak]", "×" + gameState.streak);
     text("[data-hud-heat]", HEAT_LABEL[gameState.heat]);
     updateTimerDisplay();   // also draws the time-remaining bar (below)
@@ -1952,19 +2025,41 @@
     }
     var roundScore = calculateRoundScore(basePoints, speedBonus, gameState.doubleDown);
 
-    gameState.score += roundScore;
-    if (isCorrect) {
-      gameState.correctCount += 1;
-      if (gameState.doubleDown) gameState.doubleDownsWon += 1;
+    if (encoreState.active) {
+      // Encore has its own tiny stat set — the Daily Run's score/stats
+      // stay exactly as they were when Round 10 ended.
+      encoreState.score += roundScore;
+      encoreState.roundsPlayed += 1;
+      if (isCorrect) {
+        encoreState.tokensEarned += ENCORE_TOKENS_PER_CORRECT;
+      } else {
+        encoreState.lives -= 1;   // the only way a life is lost
+      }
+      if (encoreState.stage < 3 && encoreState.roundsPlayed % ENCORE_STAGE_EVERY === 0) {
+        encoreState.stage += 1;
+      }
+    } else {
+      gameState.score += roundScore;
+      if (isCorrect) {
+        gameState.correctCount += 1;
+        if (gameState.doubleDown) gameState.doubleDownsWon += 1;
+      }
+      var resultState = "incorrect";
+      if (round.type === "order") {
+        resultState = accuracy.correct === accuracy.total ? "correct" : (accuracy.correct > 0 ? "partial" : "incorrect");
+      } else if (isCorrect) {
+        resultState = "correct";
+      }
+      gameState.roundResults.push({ type: round.type, state: resultState, wildcard: !!round.wildcard });
+
+      var answerSeconds = round.seconds - gameState.timeRemaining;
+      if (isCorrect && (gameState.fastestAnswer === null || answerSeconds < gameState.fastestAnswer)) {
+        gameState.fastestAnswer = answerSeconds;
+      }
     }
     updateStreak(isCorrect);
     updateHeat();
     unlockPowerUps();
-
-    var answerSeconds = round.seconds - gameState.timeRemaining;
-    if (isCorrect && (gameState.fastestAnswer === null || answerSeconds < gameState.fastestAnswer)) {
-      gameState.fastestAnswer = answerSeconds;
-    }
 
     renderHud();
     showRoundFeedback(round, isCorrect, speedBonus, roundScore, basePoints, accuracy);
@@ -2175,6 +2270,14 @@
   }
 
   function goToNextRound() {
+    if (encoreState.active) {
+      if (encoreState.lives <= 0) { endEncoreMode(); return; }
+      gameState.run = [generateEncoreRound()];
+      gameState.round = 1;
+      startRound();
+      $("[data-challenge]").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+      return;
+    }
     if (gameState.round >= 10) { endGame(); return; }
     gameState.round += 1;
     startRound();
@@ -2214,6 +2317,20 @@
     text("[data-results-award]", performanceTitle(gameState.correctCount, 10));
     text("[data-artifact-score]", "SCORE " + gameState.score);
 
+    // round-by-round breakdown — icon + text + colour, same convention as
+    // every other correctness state in the game
+    var breakdown = $("[data-results-breakdown]");
+    if (breakdown) {
+      var markByState = { correct: "✓", partial: "±", incorrect: "✕" };
+      breakdown.innerHTML = gameState.roundResults.map(function (r, i) {
+        return '<li class="results__breakdown-item results__breakdown-item--' + r.state + '"' +
+          ' title="Round ' + (i + 1) + ' — ' + r.type + ': ' + r.state + '">' +
+          '<span aria-hidden="true">' + markByState[r.state] + '</span>' +
+          '<span class="sr-only">Round ' + (i + 1) + ', ' + r.type + ': ' + r.state + '</span>' +
+        '</li>';
+      }).join("");
+    }
+
     var isNewBest = savePersonalBest({
       score: gameState.score,
       correct: gameState.correctCount,
@@ -2222,30 +2339,179 @@
     var badge = $("[data-new-best]");
     if (badge) badge.hidden = !isNewBest;
 
-    // My Archive: did this run's score cross a collectible's threshold?
-    var justUnlocked = checkCollectibleUnlocks(gameState.score);
+    // Run Reward — Archive Tokens for completing today's tape
+    var tokensEarned = calculateRunTokens(gameState.correctCount, isNewBest);
+    var balance = addTokens(tokensEarned);
+    text("[data-tokens-earned]", tokensEarned);
+    text("[data-tokens-balance]", balance.toLocaleString());
+
+    var mysteryBox = $("[data-mystery-tape]");
+    if (mysteryBox) mysteryBox.hidden = !(balance >= MYSTERY_TAPE_COST && hasLockedCollectible());
+
+    // in case a Mystery Tape was opened on THIS results screen already
+    // (re-entering endGame() never happens in practice, but keep it tidy)
     var unlockedBox = $("[data-results-unlocked]");
-    if (unlockedBox) {
-      unlockedBox.hidden = justUnlocked.length === 0;
-      var itemsEl = $("[data-results-unlocked-items]");
-      if (itemsEl) {
-        itemsEl.innerHTML = justUnlocked.map(function (c) {
-          return '<div class="unlocked-item">' +
-            '<img class="unlocked-item__img" src="' + c.image + '" alt="">' +
-            '<span class="unlocked-item__name">' + c.name + '</span>' +
-          '</div>';
-        }).join("");
-      }
-      if (justUnlocked.length) {
-        announce("New in My Archive: " + justUnlocked.map(function (c) { return c.name; }).join(", ") + ".");
-      }
-    }
+    if (unlockedBox) unlockedBox.hidden = true;
 
     var results = $("[data-results]");
     results.hidden = false;
     results.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
     announce("Daily run complete. " + gameState.score + " points, " +
-      gameState.correctCount + " of 10 correct.");
+      gameState.correctCount + " of 10 correct. Earned " + tokensEarned + " Archive Tokens.");
+  }
+
+  /* "Open Tape ->" on the Results screen — spend a Mystery Tape, show what
+     it revealed, refresh the balance/prompt for next time. */
+  function handleOpenMysteryTape() {
+    var revealed = openMysteryTape();
+    if (!revealed) return;
+
+    text("[data-tokens-balance]", loadTokens().toLocaleString());
+    var mysteryBox = $("[data-mystery-tape]");
+    if (mysteryBox) mysteryBox.hidden = !(loadTokens() >= MYSTERY_TAPE_COST && hasLockedCollectible());
+
+    var unlockedBox = $("[data-results-unlocked]");
+    if (unlockedBox) {
+      unlockedBox.hidden = false;
+      var itemsEl = $("[data-results-unlocked-items]");
+      if (itemsEl) {
+        itemsEl.innerHTML =
+          '<div class="unlocked-item">' +
+            '<img class="unlocked-item__img" src="' + revealed.image + '" alt="">' +
+            '<span class="unlocked-item__name">' + revealed.name + '</span>' +
+          '</div>';
+      }
+      unlockedBox.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "nearest" });
+    }
+    announce("Mystery Tape opened — new in My Archive: " + revealed.name + ".");
+  }
+
+
+  /* ==========================================================================
+     ENCORE MODE  —  optional bonus play after the Daily Run, 3 lives
+     Not date-seeded or comparable like the Daily Run — every Encore round
+     is picked fresh, so replaying Encore never looks the same twice. It
+     reuses the Daily Run's mechanics, scoring, and power-ups wholesale;
+     only the round SOURCE and the win/lose condition are different.
+     ======================================================================== */
+
+  /* like takeItemsDistinctYears() in generateDailyRun(), but self-contained
+     (no shared pool cursor) since Encore doesn't care about exhausting a
+     pool across many rounds — a fresh shuffle each call is enough. */
+  function randomItemsDistinctYears(pool, n, rng) {
+    var shuffled = shuffleArr(pool, rng);
+    var out = [], usedYears = {};
+    for (var i = 0; i < shuffled.length && out.length < n; i++) {
+      if (usedYears[shuffled[i].year]) continue;
+      usedYears[shuffled[i].year] = true;
+      out.push(shuffled[i]);
+    }
+    return out;
+  }
+
+  /* how many Timeline cards the current Encore stage uses — gradual, per
+     the redesign brief ("do not use 5-card Timeline immediately") */
+  function encoreCardCount() {
+    if (encoreState.stage >= 3) return 5;
+    if (encoreState.stage === 2) return 4;
+    return 3;
+  }
+
+  /* Build one Encore round: same theme as today, a random challenge type
+     (Insert joins the mix at stage 3 — it's otherwise Daily-Run-only-
+     reachable through Encore, per the redesign brief), fresh content each
+     time. Timer table matches section 12 of the redesign brief exactly. */
+  function generateEncoreRound() {
+    var themeId = getDailyTheme(runDate).id;
+    var seed = ((Date.now() % 2147483647) ^ ((encoreState.roundsPlayed + 1) * 2654435761)) | 0;
+    var rng = mulberry32(seed);
+
+    var pool = getThemeChallengePool(themeId);
+    var qPool = QUOTE_CHALLENGES.filter(function (q) { return q.themes.indexOf(themeId) !== -1; });
+    var oooPool = ODD_ONE_OUT.filter(function (s) { return s.themes.indexOf(themeId) !== -1; });
+    var scenePool = PIXEL_SCENES.filter(function (s) { return s.themes.indexOf(themeId) !== -1; });
+
+    var types = ["order", "quote", "which-first"];
+    if (oooPool.length) types.push("odd-one-out");
+    if (scenePool.length) types.push("pixel-scene");
+    if (encoreState.stage >= 3) types.push("insert");
+    var type = types[Math.floor(rng() * types.length)];
+
+    var cards = encoreCardCount();
+    var extra;
+
+    if (type === "quote") {
+      extra = { type: "quote", quote: shuffleArr(qPool, rng)[0] || QUOTE_CHALLENGES[0], seconds: 15 };
+    } else if (type === "which-first") {
+      var pair = pickWidestGapPair(randomItemsDistinctYears(pool, 3, rng), rng);
+      extra = { type: "which-first", itemA: pair[0], itemB: pair[1], seconds: 15 };
+    } else if (type === "odd-one-out") {
+      var set = shuffleArr(oooPool, rng)[0];
+      extra = { type: "odd-one-out", set: set, items: shuffleArr(set.items.map(itemById), rng), seconds: 18 };
+    } else if (type === "pixel-scene") {
+      extra = { type: "pixel-scene", scene: shuffleArr(scenePool, rng)[0], seconds: 18 };
+    } else if (type === "insert") {
+      var lineSet = randomItemsDistinctYears(pool, cards + 1, rng).sort(function (a, b) { return a.year - b.year; });
+      var k = 1 + Math.floor(rng() * Math.max(1, lineSet.length - 2));
+      var card = lineSet[k];
+      var timeline = lineSet.filter(function (it) { return it !== card; });
+      extra = {
+        type: "insert", timeline: timeline, card: card,
+        correctSlot: timeline.filter(function (it) { return it.year < card.year; }).length,
+        seconds: 25
+      };
+    } else {
+      extra = {
+        type: "order", items: presentOrder(randomItemsDistinctYears(pool, cards, rng)),
+        seconds: cards === 5 ? 45 : (cards === 4 ? 35 : 25)
+      };
+    }
+
+    extra.theme = themeId;
+    extra.wildcard = false;
+    return extra;
+  }
+
+  function startEncoreMode() {
+    encoreState.active = true;
+    encoreState.lives = ENCORE_LIVES;
+    encoreState.score = 0;
+    encoreState.tokensEarned = 0;
+    encoreState.stage = 1;
+    encoreState.roundsPlayed = 0;
+
+    $("[data-results]").hidden = true;
+    var exit = $("[data-exit-row]");
+    if (exit) exit.hidden = false;
+
+    gameState.run = [generateEncoreRound()];
+    gameState.round = 1;
+    startRound();
+    $("[data-challenge]").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  }
+
+  function endEncoreMode() {
+    stopTimer();
+    if (countdownId) window.clearTimeout(countdownId);
+    counting = false;
+    encoreState.active = false;
+
+    $("[data-challenge]").hidden = true;
+    $("[data-feedback]").hidden = true;
+    $("[data-round-countdown]").hidden = true;
+    var exit = $("[data-exit-row]");
+    if (exit) exit.hidden = true;
+
+    var balance = addTokens(encoreState.tokensEarned);   // Encore's own small token trickle — same one currency
+    text("[data-encore-score]", encoreState.score.toLocaleString());
+    text("[data-encore-rounds]", String(encoreState.roundsPlayed));
+    text("[data-encore-tokens]", "+" + encoreState.tokensEarned);
+    text("[data-encore-balance]", balance.toLocaleString());
+
+    var panel = $("[data-encore-results]");
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+    announce("Encore over. " + encoreState.score + " points across " + encoreState.roundsPlayed + " rounds.");
   }
 
   function copyScore() {
@@ -2300,6 +2566,8 @@
     });
     on("[data-double-down]", "click", toggleDoubleDown);
     on("[data-copy-score]", "click", copyScore);
+    on("[data-open-tape]", "click", handleOpenMysteryTape);
+    on("[data-start-encore]", "click", startEncoreMode);
 
     $all("[data-powerup]").forEach(function (btn) {
       btn.addEventListener("click", function () {
