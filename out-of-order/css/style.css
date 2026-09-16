@@ -1,0 +1,2092 @@
+/* ============================================================================
+   OUT OF ORDER  —  style.css
+   Shared by index.html, game.html, how-to-play.html
+
+   SECTIONS
+   01  Design tokens (CSS variables)
+   02  Daily theme overrides
+   03  Reset & base
+   04  Typography helpers
+   05  Layout containers
+   06  Retro stripe / filmstrip
+   07  Navigation + archive sub-bar
+   08  Buttons
+   09  Tape-label component  (physical paper / masking tape)
+   10  VHS poster  (CSS artwork fallback)
+   11  VHS spine component  (category tapes)
+   12  VHS case  (Today's Archive)
+   13  Wooden shelf
+   14  Home page
+   15  Game page (HUD, challenge, feedback, results)
+   16  How to Play page
+   17  Heat states (visual intensity by streak)
+   18  Accessibility helpers
+   19  Responsive (tablet / desktop)
+   20  Reduced motion
+
+   TYPOGRAPHY SYSTEM
+   --font-display : Bungee          -> brand / impact  (title, scores, theme name)
+   --font-ui      : Space Grotesk   -> the whole usable interface
+   --font-marker  : Permanent Marker-> handwriting on tape / labels only
+   ========================================================================== */
+
+
+/* ============================================================================
+   01  DESIGN TOKENS
+   Permanent brand foundation = cream + near-black. Daily themes change only
+   the two --theme-* accent colours (section 02).
+   ========================================================================== */
+:root {
+  /* Brand palette (from the moodboard) */
+  --color-bg:     #F2E7D1;   /* cream */
+  --color-ink:    #141414;   /* near black */
+  --color-coral:  #E2544F;
+  --color-orange: #F28A2E;
+  --color-yellow: #FFD54A;
+  --color-cyan:   #25B6D2;
+  --color-teal:   #008A8E;
+  --color-navy:   #0E1B2E;
+
+  /* Paper / label / plastic surfaces */
+  --color-label:   #F7EFDD;   /* aged cream label */
+  --color-kraft:   #E7D6B4;   /* kraft masking tape */
+  --color-plastic: #10192A;   /* VHS case navy-black */
+
+  /* Daily-theme accent colours — overridden per body.theme-* class */
+  --theme-primary:   var(--color-coral);
+  --theme-secondary: var(--color-cyan);
+
+  /* Spacing scale */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+
+  /* Shape */
+  --radius-card: 10px;
+  --radius-pill: 999px;
+  --border-ink: 2px solid var(--color-ink);
+
+  /* Focus ring (accessibility) */
+  --focus-ring: 3px solid var(--color-cyan);
+
+  /* Fonts — Google Fonts first, then a solid system fallback */
+  --font-display: "Bungee", Impact, "Arial Black", system-ui, sans-serif;
+  --font-ui:      "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-marker:  "Permanent Marker", "Bradley Hand", "Comic Sans MS", cursive;
+
+  --shadow-card: 0 2px 0 rgba(20, 20, 20, 0.18), 0 10px 22px rgba(20, 20, 20, 0.14);
+  --shadow-hard: 4px 4px 0 var(--color-ink);
+}
+
+
+/* ============================================================================
+   02  DAILY THEME OVERRIDES
+   Each daily theme is a different "VHS collection release": it changes the
+   accent colours only, never the layout or the mechanics.
+   ========================================================================== */
+/* Active editions (one per entry in THEMES): */
+body.theme-horror { --theme-primary: #E2544F; --theme-secondary: #25B6D2; }
+body.theme-sci-fi { --theme-primary: #8E72E8; --theme-secondary: #2ED0C0; }
+
+
+/* ============================================================================
+   03  RESET & BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  line-height: 1.55;
+
+  /* Hybrid texture: one real paper photo for the page ground, kept subtle. */
+  background-image:
+    linear-gradient(rgba(242, 231, 209, 0.62), rgba(242, 231, 209, 0.62)),
+    url("../assets/images/textures/paper-bg.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+}
+
+img { max-width: 100%; display: block; }
+
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+
+a { color: inherit; }
+
+main {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-3) var(--space-5);
+}
+
+
+/* ============================================================================
+   04  TYPOGRAPHY HELPERS
+   ========================================================================== */
+
+/* Small archive-style printed metadata: Space Grotesk, uppercase, spaced. */
+.meta {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.section-label {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding-bottom: var(--space-1);
+  border-bottom: var(--border-ink);
+  margin-bottom: var(--space-3);
+}
+
+.sr-only,
+.sr-live {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ============================================================================
+   05  LAYOUT CONTAINERS
+   ========================================================================== */
+.site-footer {
+  flex-shrink: 0;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.6);
+  padding-bottom: var(--space-3);
+}
+.site-footer p { padding-top: var(--space-2); }
+
+
+/* ============================================================================
+   06  RETRO STRIPE / FILMSTRIP
+   The moodboard's six-colour stripe. Small accent by default; the --film
+   variant is the worn full-width band along the very top of the page.
+   ========================================================================== */
+.retro-stripe {
+  height: 8px;
+  background: linear-gradient(
+    to right,
+    var(--color-coral)  0 16.66%,
+    var(--color-orange) 16.66% 33.33%,
+    var(--color-yellow) 33.33% 50%,
+    var(--color-cyan)   50% 66.66%,
+    var(--color-teal)   66.66% 83.33%,
+    var(--color-navy)   83.33% 100%
+  );
+}
+.retro-stripe--thin { height: 4px; }
+
+/* Worn cinema filmstrip band (top of the Home page). */
+.filmstrip {
+  height: 14px;
+  background:
+    /* sprocket-hole dots */
+    repeating-linear-gradient(to right,
+      rgba(20,20,20,0.55) 0 6px, transparent 6px 22px),
+    linear-gradient(to right,
+      var(--color-coral)  0 16.66%,
+      var(--color-orange) 16.66% 33.33%,
+      var(--color-yellow) 33.33% 50%,
+      var(--color-cyan)   50% 66.66%,
+      var(--color-teal)   66.66% 83.33%,
+      var(--color-navy)   83.33% 100%);
+  background-blend-mode: multiply;
+  filter: saturate(0.8) contrast(1.05);
+  opacity: 0.92;
+}
+
+
+/* ============================================================================
+   07  NAVIGATION + ARCHIVE SUB-BAR
+   ========================================================================== */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  border-bottom: var(--border-ink);
+}
+.site-nav__inner {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.site-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+/* clapperboard game logo next to the wordmark */
+.site-nav__logo {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.site-nav__links {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+.site-nav__links a {
+  display: inline-block;
+  padding: 0.55rem 0.8rem;
+  min-height: 44px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+}
+.site-nav__links a:hover { border-bottom-color: rgba(20, 20, 20, 0.35); }
+.site-nav__links a[aria-current="page"] {
+  border-bottom-color: var(--theme-primary);
+  font-weight: 700;
+}
+
+/* Black "video archive" strip under the nav (Home page). */
+.archive-bar {
+  background: var(--color-ink);
+  color: var(--color-label);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.archive-bar__inner {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 0.55rem var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem var(--space-3);
+  justify-content: space-between;
+}
+.archive-bar__list { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.archive-bar__now { color: var(--color-yellow); }
+.archive-bar__now::before {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-coral);
+  vertical-align: middle;
+}
+
+
+/* ============================================================================
+   08  BUTTONS
+   Space Grotesk semibold. Modern and readable — VHS personality lives in the
+   cards and labels, not the buttons.
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.8rem 1.3rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* primary = solid theme colour + hard printed shadow */
+.btn--primary {
+  background: var(--theme-primary);
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: var(--shadow-hard);
+}
+.btn--primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--color-ink); }
+
+.btn--ghost { background: transparent; border-radius: 6px; }
+
+/* Double Down — icon + text + pressed state, never colour alone */
+.btn--double {
+  background: repeating-linear-gradient(45deg, var(--color-label) 0 10px, #efe4cf 10px 20px);
+  border-style: dashed;
+}
+.btn--double[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-yellow);
+  border-style: solid;
+}
+.btn--double[aria-pressed="true"] .btn__icon { transform: scale(1.15); }
+
+
+/* ============================================================================
+   09  TAPE-LABEL COMPONENT
+   A small physical piece of masking tape placed over the layout.
+   NOT a modern badge. Text stays real HTML for accessibility + responsiveness.
+
+   Background = a real torn-tape photo (tape-strip.png). Each variant multiplies
+   a colour tint on top (--tape-tint) so the tape can shift colour for contrast
+   while keeping the physical texture and torn edges.
+   ========================================================================== */
+.tape-label {
+  --tape-ink: var(--color-ink);
+  --tape-tint: transparent;
+  position: relative;
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  font-family: var(--font-marker);
+  font-size: 1rem;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--tape-ink);
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--tape-tint), var(--tape-tint)),
+    url("../assets/images/textures/tape-strip.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  background-blend-mode: multiply, normal;
+  /* drop-shadow follows the torn PNG edges (box-shadow would look rectangular) */
+  filter: drop-shadow(2px 3px 0 rgba(20, 20, 20, 0.2));
+  transform: rotate(-1.6deg);
+}
+
+.tape-label--cream   { --tape-tint: transparent; }
+.tape-label--red     { --tape-tint: rgba(210, 60, 55, 0.94); --tape-ink: #fff; }
+.tape-label--archive {
+  --tape-tint: rgba(150, 110, 55, 0.30);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* tape stuck onto another element (e.g. over the case corner) */
+.tape-label--stuck {
+  position: absolute;
+  top: -0.8rem;
+  left: 1rem;
+  z-index: 4;
+}
+
+
+/* ============================================================================
+   10  VHS POSTER  —  CSS artwork fallback
+   Every card / theme hero renders this. A real <img> (poster__img) layers on
+   top when it loads; if it 404s, JS removes it and this stays. No broken
+   images, and the fallback still looks like a minimal cinema poster.
+   ========================================================================== */
+.poster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 3 / 4;
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 4px;
+  overflow: hidden;
+  color: var(--color-navy);
+}
+.poster--hero { width: 100%; }
+.poster--mini { width: 44px; border-width: 1px; border-radius: 3px; }
+.poster--mini .poster__initial { font-size: 1rem; text-shadow: 1px 1px 0 var(--color-navy); }
+.poster--mini .poster__stripe { height: 5px; }
+
+.poster::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--theme-primary) 0 55%, var(--theme-secondary) 55% 100%);
+  opacity: 0.9;
+}
+.poster__stripe {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 10px;
+  z-index: 2;
+  background: linear-gradient(
+    to right,
+    var(--color-coral) 0 20%, var(--color-orange) 20% 40%,
+    var(--color-yellow) 40% 60%, var(--color-cyan) 60% 80%, var(--color-navy) 80% 100%
+  );
+}
+.poster__initial {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  color: var(--color-label);
+  text-shadow: 3px 3px 0 var(--color-navy);
+}
+.poster__icon {
+  position: relative;
+  z-index: 2;
+  width: 36%;
+  color: var(--color-label);
+  filter: drop-shadow(2px 2px 0 rgba(14, 27, 46, 0.6));
+}
+.poster__icon svg { width: 100%; height: 100%; }
+.poster__img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 3;
+}
+
+
+/* ============================================================================
+   11  VHS SPINE COMPONENT  (category tapes on the shelf)
+   printed label (Space Grotesk metadata) + handwritten title (Permanent Marker)
+   ========================================================================== */
+.spine {
+  --spine-color: var(--color-coral);
+  position: relative;
+  width: 46px;                 /* thin, like a tape filed on a shelf */
+  height: 190px;
+  padding: 0.5rem 0.25rem 0.55rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.22) 0 3px,
+    var(--spine-color) 3px 100%);
+  border: 2px solid var(--color-ink);
+  border-radius: 3px 4px 4px 3px;
+  box-shadow: inset -6px 0 10px rgba(20,20,20,0.35), var(--shadow-card);
+  color: #fff;
+  text-align: center;
+}
+.spine__icon { width: 20px; height: 20px; flex: none; }
+.spine__icon svg { width: 100%; height: 100%; display: block; }
+
+/* title reads up the spine (rotated -90°), like a real VHS box */
+.spine__title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-marker);
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.spine__tag {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  padding: 1px 4px;
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 2px;
+}
+/* light-coloured spines (e.g. yellow) need dark text */
+.spine--ink { color: var(--color-ink); }
+.spine--ink .spine__tag { border-color: rgba(20, 20, 20, 0.5); }
+
+/* the tape matching TODAY's edition — pulled out and outlined, like it's
+   already queued up in the machine. The shelf is decorative for everyone
+   (see renderShelf()); this is the only thing that changes on it. */
+.spine--today {
+  transform: translateY(-10px);
+  box-shadow: 0 0 0 3px var(--color-ink), 0 12px 18px rgba(20, 20, 20, 0.3);
+}
+.spine--today .spine__tag {
+  background: var(--color-ink);
+  color: #fff;
+  border-color: var(--color-ink);
+}
+
+
+/* ============================================================================
+   12  VHS CASE  —  "Today's Archive" container (CSS, per hybrid texture plan)
+   ========================================================================== */
+.vhs-case {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background:
+    radial-gradient(120% 80% at 30% 0%, #1a2942 0%, var(--color-plastic) 55%, #070d18 100%);
+  border: 2px solid #05101d;
+  border-radius: 16px;
+  /* worn plastic depth */
+  box-shadow:
+    inset 0 0 0 2px rgba(214, 178, 92, 0.15),
+    inset 0 0 46px rgba(0, 0, 0, 0.55),
+    0 22px 50px rgba(20, 20, 20, 0.35);
+  color: var(--color-label);
+}
+/* faint scuffed-corner speckle */
+.vhs-case::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 4% 5%, rgba(214,178,92,0.4) 0 1px, transparent 2px),
+    radial-gradient(circle at 96% 92%, rgba(214,178,92,0.35) 0 1px, transparent 2px),
+    radial-gradient(circle at 92% 6%, rgba(214,178,92,0.3) 0 1px, transparent 2px);
+  pointer-events: none;
+}
+
+.vhs-case__poster {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+}
+
+.vhs-case__info {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.vhs-case__date { align-self: flex-end; color: rgba(247, 239, 221, 0.7); }
+.vhs-case__theme {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 0.95;
+  color: var(--theme-primary);
+  margin-top: var(--space-1);
+}
+.vhs-case__tagline {
+  font-family: var(--font-marker);
+  font-size: 1rem;
+  color: rgba(247, 239, 221, 0.9);
+  margin-top: 2px;
+}
+.vhs-case__mix { color: rgba(247, 239, 221, 0.6); margin-bottom: var(--space-1); }
+.vhs-case__motifs { color: rgba(247, 239, 221, 0.75); }
+.vhs-case__facts {
+  display: flex;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+}
+.vhs-case__facts .fact {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(247, 239, 221, 0.75);
+}
+.vhs-case__facts strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-label);
+}
+.vhs-case__hint { color: var(--theme-secondary); }
+.vhs-case__hint::before {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
+}
+
+.vhs-case__footer {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px dashed rgba(247, 239, 221, 0.3);
+}
+.vhs-case__print {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  color: rgba(247, 239, 221, 0.7);
+}
+.vhs-case__vhs {
+  border: 1px solid rgba(247, 239, 221, 0.6);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+/* Horror edition: a punchier red (#DD3A47) for the pieces sitting on the dark
+   navy case, where it reads with more contrast than the default accent. */
+body.theme-horror .vhs-case__theme { color: #DD3A47; }
+body.theme-horror .vhs-case__poster .tape-label { --tape-ink: #DD3A47; }
+body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
+
+
+/* ============================================================================
+   13  WOODEN SHELF  (row of category spines)
+   ========================================================================== */
+.shelf {
+  position: relative;
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-end;
+  padding: 1rem var(--space-2) 0.6rem;   /* headroom for a "pulled-out" spine */
+  overflow-x: auto;           /* spines scroll on small screens, page does not */
+  scrollbar-width: thin;
+}
+/* the plank */
+.shelf::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 14px;
+  background: linear-gradient(180deg, #7a4a24, #5a3417);
+  border: 2px solid var(--color-ink);
+  border-radius: 3px;
+  box-shadow: 0 8px 14px rgba(20, 20, 20, 0.3);
+}
+.shelf__wrap { position: relative; padding-bottom: 14px; }
+.shelf .spine { flex: none; }
+
+
+/* ============================================================================
+   14  HOME PAGE
+   Two columns on desktop: hero (left) + Today's Archive VHS case (right).
+   ========================================================================== */
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* keeps children from forcing the page wide */
+  gap: var(--space-4);
+}
+
+.home__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.home__kicker { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.home__kicker-note {
+  font-family: var(--font-marker);
+  font-size: 1rem;
+  border-bottom: 2px solid var(--color-ink);
+  padding-bottom: 2px;
+}
+
+.home__title {
+  font-family: var(--font-display);
+  font-size: clamp(3.25rem, 11vw, 6.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+}
+.home__title span { display: block; }
+
+.home__rule {
+  height: 8px;
+  max-width: 340px;
+  background: linear-gradient(
+    to right,
+    var(--color-coral) 0 20%, var(--color-orange) 20% 40%,
+    var(--color-yellow) 40% 60%, var(--color-cyan) 60% 80%, var(--color-navy) 80% 100%
+  );
+}
+
+.home__pitch {
+  font-family: var(--font-marker);
+  font-size: clamp(1.15rem, 3.5vw, 1.7rem);
+  line-height: 1.25;
+  max-width: 22ch;
+  border-bottom: 3px solid var(--color-ink);
+  padding-bottom: 0.4rem;
+  width: fit-content;
+}
+
+.home__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.home__cta-note { margin-top: 0.5rem; color: rgba(20, 20, 20, 0.6); }
+
+/* ---- Beta Theme switcher — testers only, hidden unless ?beta=true ---- */
+.beta-theme {
+  margin-top: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 2px dashed rgba(20, 20, 20, 0.35);
+  border-radius: 8px;
+  max-width: 460px;
+}
+.beta-theme__label { color: rgba(20, 20, 20, 0.6); flex-basis: 100%; }
+.beta-theme__buttons { display: flex; gap: 0.5rem; }
+.beta-theme__btn {
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.beta-theme__btn[aria-pressed="true"] { background: var(--color-ink); color: #fff; }
+
+/* Personal best box */
+.best {
+  border: var(--border-ink);
+  border-radius: 6px;
+  background: rgba(247, 239, 221, 0.7);
+  padding: var(--space-2) var(--space-3);
+  max-width: 460px;
+}
+.best__head { color: var(--theme-primary); margin-bottom: 0.3rem; }
+.best__body { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.best__none { font-family: var(--font-ui); font-weight: 700; font-size: 1.15rem; }
+.best__score {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  color: var(--theme-primary);
+}
+.best__hint { color: rgba(20, 20, 20, 0.7); font-size: 0.9rem; }
+
+/* archive / shelf block */
+.home__archive-shelf { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+
+/* ---- My Archive : Beta collectibles shelf ----
+   A 12-slot grid. Only 2 slots can ever hold something in this Beta; the
+   rest are always locked "coming soon" placeholders — never a complete set. */
+.archive-collection { margin-top: var(--space-2); }
+.archive-collection__status { color: rgba(20, 20, 20, 0.7); font-size: 0.9rem; }
+.archive-collection__tokens {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: var(--space-2);
+}
+.archive-collection__token-icon { width: 1.1rem; height: auto; }
+.archive-collection__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+.collection-slot {
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--color-ink);
+  border-radius: 8px;
+  background: var(--color-label);
+}
+.collection-slot--locked {
+  background: repeating-linear-gradient(135deg, rgba(20, 20, 20, 0.05) 0 8px, rgba(20, 20, 20, 0.1) 8px 16px);
+  color: rgba(20, 20, 20, 0.4);
+}
+.collection-slot--unlocked { border: var(--border-ink); border-color: var(--theme-primary); }
+.collection-slot__mark { font-family: var(--font-display); font-size: 1.4rem; }
+.collection-slot__img { max-width: 80%; max-height: 65%; object-fit: contain; }
+.collection-slot__label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Memory of the Day — small archive note under the VHS case */
+.memory {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.7rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: rgba(247, 239, 221, 0.7);
+  border: 1px solid var(--color-ink);
+  border-left: 5px solid var(--theme-secondary);
+  border-radius: 4px;
+}
+.memory__label { color: var(--theme-primary); width: 100%; }
+.memory__title { font-family: var(--font-display); font-size: 1.05rem; }
+.memory__meta { color: rgba(20, 20, 20, 0.6); }
+
+
+/* ============================================================================
+   15  GAME PAGE
+   Same materials as Home: aged-cream panels, black borders, hard offset
+   shadows, retro-stripe accents. Layout follows the Figma game screen.
+   ========================================================================== */
+.game {
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---- HUD : a compact "archive inventory" panel ---- */
+.hud {
+  background: rgba(247, 239, 221, 0.9);
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 0 var(--space-3) var(--space-2);
+  overflow: hidden;
+}
+.hud__brand {
+  margin: 0 calc(-1 * var(--space-3)) 0;
+  padding: 0.4rem var(--space-3);
+  background: var(--color-ink);
+  color: var(--color-label);
+  font-size: 0.68rem;
+}
+.hud__brand span { color: rgba(247, 239, 221, 0.6); }
+
+.hud__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-2);
+}
+.hud__group { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+.hud__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--theme-secondary);
+}
+.hud__label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.65);
+}
+.hud__value { font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.hud__value--score { font-family: var(--font-display); font-size: 1.2rem; color: var(--theme-primary); }
+.hud__heat { text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---- time remaining bar ----
+   Repurposed from a thin "round progress" strip into a big, hard-to-miss
+   clock: it drains from full to empty over the round's own timer, and
+   turns red in the last 3 seconds as a last call to answer. */
+.rprogress { display: grid; gap: 6px; margin-bottom: var(--space-1); }
+.rprogress__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.7);
+}
+.rprogress__track {
+  height: 22px;
+  background: rgba(20, 20, 20, 0.1);
+  border: var(--border-ink);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.rprogress__fill {
+  height: 100%;
+  background: var(--theme-secondary);
+  transition: width 1s linear, background-color 200ms ease;
+}
+.rprogress__fill--danger { background: var(--color-coral); }
+
+/* ---- challenge panel : the visual focus ---- */
+.challenge {
+  position: relative;
+  background: rgba(247, 239, 221, 0.92);
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-3);
+  overflow: hidden;
+}
+/* colour strip along the top edge (like the Figma panel) */
+.challenge::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: linear-gradient(
+    to right,
+    var(--color-coral) 0 20%, var(--color-orange) 20% 40%,
+    var(--color-yellow) 40% 60%, var(--color-cyan) 60% 80%, var(--color-navy) 80% 100%
+  );
+}
+
+.challenge__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.challenge__tag { color: rgba(20, 20, 20, 0.7); }
+.challenge__count {
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+}
+/* Themed Round (theme accent) vs Archive Wildcard (neutral) — explains why
+   an off-theme title can show up during today's edition */
+.challenge__badge {
+  border: 1px solid var(--theme-primary);
+  color: var(--theme-primary);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-weight: 700;
+}
+.challenge__badge--wildcard {
+  border-color: rgba(20, 20, 20, 0.4);
+  color: rgba(20, 20, 20, 0.6);
+}
+
+.challenge__instruction {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  line-height: 1;
+  margin: 0.35rem 0 0.25rem;
+}
+.challenge__help { color: rgba(20, 20, 20, 0.75); margin-bottom: var(--space-2); }
+.challenge--no-bonus .hud__value--timer,
+.challenge--no-bonus [data-hud-speed] { color: var(--color-coral); }
+
+/* 3-2-1 "get ready" intro — a full-screen pop-up shown before a round's
+   cards/options are revealed. One full second per number (a real 3-2-1,
+   not a blink). Same show/hide pattern as feedback/results: `hidden`. */
+.round-countdown {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  background: var(--color-ink);
+}
+.round-countdown[hidden] { display: none; }
+.round-countdown__label {
+  font-family: var(--font-marker);
+  font-size: clamp(1.1rem, 4vw, 1.6rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-coral);
+}
+.round-countdown__num {
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 34vw, 13rem);
+  line-height: 1;
+  color: var(--color-bg);
+}
+.round-countdown__num--pop { animation: countdown-pop 850ms ease; }
+@keyframes countdown-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  25%  { transform: scale(1.08); opacity: 1; }
+  40%  { transform: scale(1); opacity: 1; }
+  80%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.94); opacity: 0; }
+}
+
+/* ---- the ORDER card row ---- */
+/* persistent direction guide above every Timeline round — which end is
+   oldest is never left to guesswork */
+.timeline-direction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.timeline-direction__end {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.65);
+  white-space: nowrap;
+}
+.timeline-direction__line {
+  flex: 1;
+  position: relative;
+  height: 1px;
+  background: rgba(20, 20, 20, 0.25);
+}
+.timeline-direction__arrow {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--theme-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.order-list {
+  display: grid;
+  gap: var(--space-2);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.order-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-top: 10px solid var(--card-color, var(--color-coral));
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  cursor: grab;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.order-card:active { cursor: grabbing; }
+.order-card--dragging {
+  opacity: 0.6;
+  transform: rotate(1deg) scale(1.02);
+  box-shadow: 0 14px 26px rgba(20, 20, 20, 0.28);
+}
+.order-card--locked { cursor: default; }
+
+.order-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-1);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(20, 20, 20, 0.25);
+}
+.order-card__code { color: rgba(20, 20, 20, 0.55); font-family: var(--font-ui); }
+
+.order-card__art {
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid var(--color-ink);
+  aspect-ratio: 16 / 10;
+}
+/* genre-coloured fallback poster (hidden once a real image loads on top) */
+.order-card__art::before {
+  background: linear-gradient(150deg,
+    var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.order-card__art .poster__initial { font-size: clamp(1.8rem, 6vw, 2.6rem); }
+
+.order-card__title {
+  font-weight: 700;
+  font-size: 0.98rem;
+  line-height: 1.15;
+  padding: 0.6rem 0.6rem 0.4rem;
+  flex: 1;
+}
+
+/* remake/reboot/version disambiguator — e.g. "Dune (Villeneuve Film)".
+   Only titles that need it carry one; never reveals the release year. */
+.version-label {
+  font-weight: 500;
+  font-size: 0.8em;
+  color: rgba(20, 20, 20, 0.55);
+}
+
+/* release-year tag (hidden until REVEAL or feedback) — shared by all 3 types */
+.year-tag {
+  align-self: flex-start;
+  margin: 0 0.6rem 0.5rem;
+  padding: 2px 8px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--color-label);
+  background: var(--color-navy);
+  border-radius: 3px;
+}
+.year-tag__badge {
+  display: none;
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--color-cyan);
+  margin-right: 0.4rem;
+}
+.year-tag--power .year-tag__badge { display: inline; }
+
+/* per-card ✓ / ✕ badge shown on ORDER reveal */
+.order-card__mark {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 4;
+  display: none;
+  width: 1.7rem; height: 1.7rem;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-label);
+}
+.order-card--right .order-card__mark,
+.order-card--wrong .order-card__mark { display: grid; }
+.order-card--right { border-color: var(--color-teal); }
+.order-card--right .order-card__mark { background: var(--color-teal); color: #fff; }
+.order-card--wrong { border-color: var(--color-coral); }
+.order-card--wrong .order-card__mark { background: var(--color-coral); color: #fff; }
+
+/* two separated outlined buttons, like the Figma game screen */
+.order-card__controls {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-top: 1px solid rgba(20, 20, 20, 0.2);
+}
+.order-card__move {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.4rem 0.5rem;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: var(--color-bg);
+  border: 2px solid var(--color-ink);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+.order-card__move span { font-size: 0.9rem; line-height: 1; }
+.order-card__move:hover:not(:disabled) { background: var(--color-yellow); transform: translateY(-1px); }
+.order-card__move:active:not(:disabled) { transform: translateY(0); }
+.order-card__move:disabled { opacity: 0.3; cursor: not-allowed; }
+.order-card--locked .order-card__controls { display: none; }
+
+/* REVEAL power-up: list is waiting for a card pick */
+.order-list--revealing .order-card { cursor: pointer; outline: 2px dashed var(--color-cyan); outline-offset: 2px; }
+
+
+/* small numbered circle in front of a card title — shown on WHICH CAME
+   FIRST and ODD ONE OUT cards so the on-screen number matches the
+   keyboard shortcut that picks that card. */
+.card-num {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem; height: 1.4rem;
+  margin-right: 0.35em;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-bg);
+  vertical-align: middle;
+}
+
+/* ---- MECHANIC 02 : WHICH CAME FIRST ----
+   Two title cards. Tap the one that came out first, then Submit Answer.
+   (Was Before/After — the drag tag is gone, the question is now always
+   the same one, so there's nothing left to interpret.) */
+.wcf__row {
+  display: grid;
+  gap: var(--space-2);
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.wcf-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: #fbf6e9;
+  border: var(--border-ink);
+  border-top: 10px solid var(--card-color, var(--color-coral));
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-2);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.wcf-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
+.wcf-card:disabled { cursor: not-allowed; }
+.wcf-card__art {
+  margin: 0.5rem 0;
+  aspect-ratio: 16 / 9;
+  border: var(--border-ink);
+  border-radius: 6px;
+}
+.wcf-card__art::before {
+  background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.wcf-card__title { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.05; }
+.wcf-card__cat { color: rgba(20, 20, 20, 0.55); margin-top: 0.25rem; }
+
+/* ✓ / ✕ mark, revealed alongside the outline so correctness is never
+   colour-only */
+.wcf-card__mark {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 4;
+  display: none;
+  width: 1.7rem; height: 1.7rem;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-label);
+}
+.wcf-card--right .wcf-card__mark,
+.wcf-card--wrong .wcf-card__mark { display: grid; }
+.wcf-card--right .wcf-card__mark { background: var(--color-teal); color: #fff; }
+.wcf-card--wrong .wcf-card__mark { background: var(--color-coral); color: #fff; }
+
+.wcf-card--on { background: var(--color-ink); color: var(--color-bg); }
+.wcf-card--on .wcf-card__cat { color: rgba(247, 239, 221, 0.7); }
+.wcf-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.wcf-card--wrong.wcf-card--on { background: var(--color-coral); color: #fff; }
+.wcf-card--wrong.wcf-card--on .wcf-card__cat { color: rgba(255, 255, 255, 0.8); }
+
+
+/* ---- MECHANIC 03 : INSERT ---- */
+.insert-card {
+  max-width: 340px;
+  margin: 0 auto var(--space-3);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 10px;
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-2);
+}
+.insert-card > .meta { color: rgba(20, 20, 20, 0.55); }
+.insert-card__body { display: flex; gap: var(--space-2); align-items: center; margin-top: 0.4rem; }
+.insert-card__art {
+  flex: none;
+  width: 84px;
+  aspect-ratio: 16 / 10;
+  border: var(--border-ink);
+  border-radius: 4px;
+}
+.insert-card__art::before {
+  background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.insert-card__title { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.05; }
+.insert-card__info .meta { color: rgba(20, 20, 20, 0.55); }
+.insert-card__info .year-tag { margin: 0.3rem 0 0; }
+
+.insert-timeline {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  overflow-x: auto;        /* the timeline scrolls sideways; the page never does */
+  scrollbar-width: thin;
+}
+@media (min-width: 620px) {
+  .insert-timeline { justify-content: center; }
+}
+.insert-timeline__gap { display: flex; flex: none; }
+.insert-item { flex: none; }
+.insert-slot {
+  min-width: 40px;
+  min-height: 44px;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: rgba(20, 20, 20, 0.4);
+  background: transparent;
+  border: 2px dashed rgba(20, 20, 20, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.insert-slot:hover:not(:disabled) { border-color: var(--color-ink); background: rgba(20, 20, 20, 0.05); }
+.insert-slot--on { border-style: solid; border-color: var(--theme-primary); background: rgba(226, 84, 79, 0.12); color: var(--theme-primary); }
+.insert-slot--right { border-style: solid; border-color: var(--color-teal); background: rgba(0, 138, 142, 0.15); color: var(--color-teal); }
+.insert-slot--wrong { border-style: solid; border-color: var(--color-coral); color: var(--color-coral); }
+.insert-slot:disabled { cursor: default; }
+
+.insert-item {
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-top: 6px solid var(--card-color, var(--color-coral));
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--color-ink);
+}
+.insert-item__art {
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--color-ink);
+  border-radius: 3px;
+}
+.insert-item__art::before {
+  background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.insert-item__title { font-family: var(--font-display); font-size: 0.68rem; line-height: 1; text-align: center; }
+.insert-item .year-tag { align-self: center; margin: 0; font-size: 0.7rem; padding: 1px 5px; }
+.insert-item .year-tag__badge { display: none !important; }
+
+
+/* ---- MECHANIC 04 : QUOTE ("Name That Movie") ---- */
+.quote {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-left: 8px solid var(--theme-secondary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 1rem + 1.6vw, 1.7rem);
+  line-height: 1.35;
+}
+.quote__mark {
+  font-family: var(--font-display);
+  color: var(--theme-primary);
+  font-size: 1.1em;
+  line-height: 0;
+  vertical-align: -0.25em;
+  margin: 0 0.1em;
+}
+
+.quote-options { display: grid; gap: var(--space-2); }
+.quote-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 56px;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+.quote-option:hover:not(:disabled) { transform: translate(-1px, -1px); background: #fbf3df; }
+.quote-option__letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem; height: 1.8rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+}
+.quote-option--on {
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+.quote-option--on .quote-option__letter { border-color: var(--color-bg); }
+.quote-option--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.quote-option--right .quote-option__letter { background: var(--color-teal); color: #fff; border-color: var(--color-teal); }
+.quote-option--wrong.quote-option--on { background: var(--color-coral); color: #fff; }
+.quote-option--out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
+
+/* ---- MECHANIC 05 : ODD ONE OUT ----
+   4 titles in a 2x2 grid at every width (never 1 column) — tap the one
+   that doesn't belong. */
+.ooo__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.ooo-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: #fbf6e9;
+  border: var(--border-ink);
+  border-top: 8px solid var(--card-color, var(--color-coral));
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+.ooo-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
+.ooo-card:disabled { cursor: not-allowed; }
+.ooo-card__art { aspect-ratio: 16 / 9; border: var(--border-ink); border-radius: 6px; }
+.ooo-card__art::before {
+  background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
+  opacity: 1;
+}
+.ooo-card__title { font-weight: 700; font-size: 0.85rem; line-height: 1.15; padding: 0.4rem 0.2rem 0.1rem; }
+
+.ooo-card__mark {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 4;
+  display: none;
+  width: 1.6rem; height: 1.6rem;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-label);
+}
+.ooo-card--right .ooo-card__mark,
+.ooo-card--wrong .ooo-card__mark { display: grid; }
+.ooo-card--right .ooo-card__mark { background: var(--color-teal); color: #fff; }
+.ooo-card--wrong .ooo-card__mark { background: var(--color-coral); color: #fff; }
+
+.ooo-card--on { background: var(--color-ink); color: var(--color-bg); }
+.ooo-card--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.ooo-card--wrong.ooo-card--on { background: var(--color-coral); color: #fff; }
+.ooo-card--out { opacity: 0.35; cursor: not-allowed; }
+
+/* ---- MECHANIC 06 : PIXEL SCENE ("Recognize This Scene?") ----
+   One large supplied image + 3 answer options, styled exactly like QUOTE
+   (same options list, an image instead of a line of dialogue). */
+.pixel-scene {
+  border: var(--border-ink);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  background: var(--color-ink);
+}
+.pixel-scene__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.pixel-scene-options { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.pixel-scene-opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 56px;
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+.pixel-scene-opt:hover:not(:disabled) { transform: translate(-1px, -1px); background: #fbf3df; }
+.pixel-scene-opt__letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem; height: 1.8rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+}
+.pixel-scene-opt--on { background: var(--color-ink); color: var(--color-bg); }
+.pixel-scene-opt--on .pixel-scene-opt__letter { border-color: var(--color-bg); }
+.pixel-scene-opt--right { outline: 3px solid var(--color-teal); outline-offset: 2px; }
+.pixel-scene-opt--right .pixel-scene-opt__letter { background: var(--color-teal); color: #fff; border-color: var(--color-teal); }
+.pixel-scene-opt--wrong.pixel-scene-opt--on { background: var(--color-coral); color: #fff; }
+.pixel-scene-opt--out { opacity: 0.3; text-decoration: line-through; cursor: not-allowed; }
+
+/* ---- action row : power-ups + double down + lock ---- */
+.challenge__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+.powerups { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+
+/* power-ups look like small paper coupons */
+.powerup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-height: 44px;
+  padding: 0.35rem 0.7rem;
+  background: var(--color-label);
+  border: 1px dashed var(--color-ink);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.powerup__icon { font-family: var(--font-display); font-size: 0.7rem; }
+.powerup__lock { font-size: 0.58rem; color: rgba(20, 20, 20, 0.6); }
+.powerup__count {
+  font-size: 0.58rem;
+  color: var(--color-teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.powerup:not(.powerup--ready) .powerup__count { display: none; }
+.powerup--ready { border-style: solid; background: #FBF3DF; }
+.powerup--ready .powerup__lock { display: none; }
+.powerup:disabled { opacity: 0.55; cursor: not-allowed; }
+.powerup--ready:disabled { opacity: 0.75; }
+
+.challenge__decide {
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+/* Double Down — a small "RISK" tab + dashed body; solid coral when active */
+.btn--double {
+  position: relative;
+  padding-top: 1.1rem;
+  border-radius: 6px;
+  background: repeating-linear-gradient(45deg, var(--color-label) 0 10px, #efe4cf 10px 20px);
+  border-style: dashed;
+}
+.btn__risk {
+  position: absolute;
+  top: -0.6rem; left: 0.6rem;
+  background: var(--color-yellow);
+  border: 2px solid var(--color-ink);
+  border-radius: 3px;
+  padding: 0 6px;
+  font-size: 0.55rem;
+}
+.btn--double-active {
+  background: var(--color-coral);
+  color: #fff;
+  border-style: solid;
+}
+.btn--double-active .btn__icon { transform: scale(1.2); }
+
+/* Lock Order — the primary round CTA (coral, hard offset shadow) */
+.btn--lock {
+  background: var(--color-coral);
+  color: #fff;
+  border: var(--border-ink);
+  border-radius: 6px;
+  box-shadow: var(--shadow-hard);
+  font-size: 1.05rem;
+  padding: 0.9rem 1.6rem;
+  flex: 1;
+}
+.btn--lock:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--color-ink); }
+.btn--lock:disabled { opacity: 0.5; box-shadow: none; transform: none; }
+
+/* Exit challenge — quiet text link, not a CTA */
+.challenge__exit { text-align: center; }
+.challenge__exit a {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(20, 20, 20, 0.6);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.challenge__exit a:hover { color: var(--color-ink); border-bottom-color: var(--color-ink); }
+
+/* brief VHS-tracking wobble, used on the feedback pop-up after a wrong answer */
+@keyframes vhs-tracking {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-2px) skewX(-0.4deg); }
+  50%  { transform: translateX(2px); }
+  75%  { transform: translateX(-1px) skewX(0.3deg); }
+  100% { transform: translateX(0); }
+}
+
+/* ---- feedback : an archive verification pop-up ----
+   Shown after every answer — right, wrong, or time-out. A dimmed backdrop
+   covers the page and "Next challenge >" is the only way out. Shown/hidden
+   with the `hidden` attribute, the same pattern as the rest of the game. */
+.feedback {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: rgba(20, 20, 20, 0.55);
+  animation: feedback-fade 160ms ease;
+}
+/* our `display: grid` above would otherwise beat the browser's [hidden] rule */
+.feedback[hidden] { display: none; }
+@keyframes feedback-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.feedback__box {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: rgba(247, 239, 221, 0.98);
+  border: var(--border-ink);
+  border-left-width: 8px;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4) var(--space-3);
+  animation: feedback-pop 180ms ease;
+}
+@keyframes feedback-pop { from { transform: translateY(10px); } to { transform: translateY(0); } }
+
+.feedback--correct .feedback__box { border-left-color: var(--color-teal); }
+.feedback--partial .feedback__box { border-left-color: var(--color-orange); }
+.feedback--incorrect .feedback__box { border-left-color: var(--color-coral); }
+
+/* wrong answer: the pop-up does a brief VHS-tracking wobble instead of the pop */
+.feedback__box--wrong { animation: vhs-tracking 450ms steps(2, end) 2; }
+
+.feedback__strip {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+.feedback__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem; height: 2rem;
+  border: var(--border-ink);
+  border-radius: 50%;
+  font-weight: 700;
+}
+.feedback--correct .feedback__mark { background: var(--color-teal); color: #fff; }
+.feedback--partial .feedback__mark { background: var(--color-orange); color: #fff; }
+.feedback--incorrect .feedback__mark { background: var(--color-coral); color: #fff; }
+.feedback__title { font-family: var(--font-display); font-size: clamp(1.2rem, 5vw, 1.8rem); }
+.feedback__subtitle { color: rgba(20, 20, 20, 0.65); font-weight: 600; margin-top: -0.3rem; }
+.feedback__stamp {
+  margin-left: auto;
+  font-family: var(--font-marker);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  border: 2px solid var(--color-ink);
+  border-radius: 3px;
+  padding: 1px 8px;
+  transform: rotate(-3deg);
+}
+.feedback--correct .feedback__stamp { color: var(--color-teal); border-color: var(--color-teal); }
+.feedback--partial .feedback__stamp { color: var(--color-orange); border-color: var(--color-orange); }
+.feedback--incorrect .feedback__stamp { color: var(--color-coral); border-color: var(--color-coral); }
+
+.feedback__timeline {
+  margin: var(--space-3) 0;
+  display: grid;
+  gap: 2px;
+}
+.feedback__timeline li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.4rem 0.2rem;
+  border-bottom: 1px dashed rgba(20, 20, 20, 0.3);
+}
+.feedback__timeline strong { font-family: var(--font-display); }
+
+.breakdown {
+  width: 100%;
+  max-width: 300px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  margin: var(--space-2) 0;
+}
+.breakdown th, .breakdown td {
+  text-align: left;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed rgba(20, 20, 20, 0.3);
+}
+.breakdown td { text-align: right; }
+.breakdown__total th, .breakdown__total td {
+  border-bottom: none;
+  border-top: var(--border-ink);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-top: 0.4rem;
+}
+.feedback__streak { font-weight: 700; margin: var(--space-2) 0 var(--space-3); }
+
+/* ---- Results panel ---- */
+.results {
+  text-align: center;
+  background: rgba(247, 239, 221, 0.9);
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  padding: var(--space-5) var(--space-3);
+}
+.results__heading { font-family: var(--font-display); font-size: clamp(1.75rem, 7vw, 3rem); }
+.results__new-best { display: inline-block; margin-top: var(--space-2); }
+.results__score {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 15vw, 5.5rem);
+  line-height: 1;
+  color: var(--theme-primary);
+  margin-top: var(--space-3);
+}
+.results__score-label { letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; }
+.results__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  max-width: 420px;
+  margin: var(--space-4) auto;
+}
+.results__stats li { border: 1px solid var(--color-ink); border-radius: 6px; padding: var(--space-2); }
+.results__stats span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.results__stats strong { font-family: var(--font-display); font-size: 1.2rem; }
+.results__title-award {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--theme-primary);
+  margin: var(--space-3) 0;
+}
+.results__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; margin-top: var(--space-3); }
+.results__copied { margin-top: var(--space-2); color: var(--color-teal); font-weight: 600; }
+.results__score--sub { font-size: clamp(1.6rem, 5vw, 2.2rem); margin-top: var(--space-1); }
+
+/* round-by-round breakdown — one small badge per round, left = round 1 */
+.results__breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 420px;
+  margin: var(--space-3) auto 0;
+}
+.results__breakdown-item {
+  display: inline-grid;
+  place-items: center;
+  width: 1.9rem; height: 1.9rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-label);
+}
+.results__breakdown-item--correct { background: var(--color-teal); color: #fff; }
+.results__breakdown-item--partial { background: var(--color-orange); color: #fff; }
+.results__breakdown-item--incorrect { background: var(--color-coral); color: #fff; }
+
+/* Run Reward — Archive Tokens earned + running balance + Mystery Tape */
+.results__tokens {
+  margin: var(--space-3) auto 0;
+  max-width: 320px;
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  background: rgba(247, 239, 221, 0.9);
+  padding: var(--space-2) var(--space-3);
+}
+.results__tokens-label { color: var(--theme-primary); margin-bottom: 0.2rem; }
+.results__tokens-earned {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+.results__token-icon { width: 1.6rem; height: auto; }
+.results__mystery-tape {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed rgba(20, 20, 20, 0.3);
+}
+.results__mystery-ready {
+  font-family: var(--font-marker);
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Encore CTA at the bottom of the Daily Run results */
+.results__encore {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px dashed rgba(20, 20, 20, 0.3);
+}
+.results__encore-note { margin-top: 0.4rem; }
+
+/* shown only when a run's score just crossed a collectible's threshold */
+.results__unlocked {
+  margin: var(--space-2) auto 0;
+  max-width: 300px;
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  background: rgba(247, 239, 221, 0.9);
+  padding: var(--space-2);
+}
+.results__unlocked-label { color: var(--theme-primary); margin-bottom: 0.3rem; }
+.results__unlocked-items { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; }
+.unlocked-item { display: grid; place-items: center; gap: 2px; width: 90px; }
+.unlocked-item__img { max-width: 80%; max-height: 70px; object-fit: contain; }
+.unlocked-item__name { font-size: 0.75rem; font-weight: 700; }
+
+/* VHS tape "collectible" on the results screen */
+.tape-artifact {
+  position: relative;
+  max-width: 300px;
+  margin: var(--space-4) auto 0;
+  background: var(--color-plastic);
+  color: var(--color-label);
+  border: var(--border-ink);
+  border-radius: 6px;
+  padding: var(--space-3);
+  text-align: left;
+  transform: rotate(-1.5deg);
+  box-shadow: var(--shadow-card);
+}
+.tape-artifact__stripe {
+  display: block;
+  height: 8px;
+  margin-bottom: var(--space-2);
+  background: linear-gradient(
+    to right,
+    var(--color-coral) 0 20%, var(--color-orange) 20% 40%,
+    var(--color-yellow) 40% 60%, var(--color-cyan) 60% 80%, var(--color-navy) 80% 100%
+  );
+}
+.tape-artifact__brand { font-family: var(--font-display); font-size: 1.05rem; }
+.tape-artifact__line { font-family: var(--font-marker); font-size: 1.25rem; }
+.tape-artifact__date, .tape-artifact__score { font-size: 0.85rem; letter-spacing: 0.08em; font-weight: 600; }
+
+
+/* ============================================================================
+   16  HOW TO PLAY PAGE
+   ========================================================================== */
+.howto__hero { margin-bottom: var(--space-4); display: grid; gap: var(--space-2); }
+.howto__title { font-family: var(--font-display); font-size: clamp(2.25rem, 8vw, 4rem); line-height: 0.9; }
+.howto__lede { font-weight: 500; }
+
+.steps { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); }
+.step {
+  position: relative;
+  background: rgba(247, 239, 221, 0.85);
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  padding-left: var(--space-5);
+}
+.step__num { position: absolute; top: var(--space-3); left: var(--space-2); font-family: var(--font-display); color: var(--theme-primary); }
+.step__art { display: flex; align-items: center; gap: 0.4rem; margin-bottom: var(--space-2); min-height: 48px; }
+.step__heading { font-family: var(--font-display); font-size: 1.2rem; }
+.step__text { margin-top: 0.25rem; }
+
+.mini-card {
+  display: inline-grid;
+  place-items: center;
+  width: 40px; height: 54px;
+  background: var(--color-bg);
+  border: 2px solid var(--color-ink);
+  border-radius: 4px;
+  font-family: var(--font-display);
+}
+.mini-arrow { font-family: var(--font-display); }
+.chip { font-size: 0.8rem; font-weight: 600; border: 1px solid var(--color-ink); border-radius: var(--radius-pill); padding: 3px 10px; }
+.chip--warn { border-style: dashed; font-weight: 700; }
+
+.howto__panel {
+  background: rgba(247, 239, 221, 0.85);
+  border: var(--border-ink);
+  border-radius: var(--radius-card);
+  padding: var(--space-4) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.howto__panel--timer { border-color: var(--color-coral); }
+
+.mini-table, .def-list { margin-top: var(--space-2); }
+.mini-table { border-collapse: collapse; font-size: 0.9rem; }
+.mini-table th, .mini-table td { border: 1px solid var(--color-ink); padding: 0.4rem 0.9rem; text-align: left; }
+
+.def-list dt { font-weight: 700; margin-top: var(--space-2); }
+.pill {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  letter-spacing: 0.05em;
+}
+
+.type-grid { display: grid; gap: var(--space-2); margin-top: var(--space-2); }
+.type-card { border: 1px solid var(--color-ink); border-radius: 6px; padding: var(--space-2); }
+.type-card h3 { font-family: var(--font-display); font-size: 1rem; }
+
+.howto__cta { margin-top: var(--space-3); }
+
+
+/* ============================================================================
+   17  HEAT STATES  —  visual intensity rises with the streak
+   RULE: the ENVIRONMENT gets louder; the CHALLENGE stays ordered and readable.
+   Movement is disabled under prefers-reduced-motion (section 20).
+   ========================================================================== */
+body.heat-warm   { --shadow-card: 0 2px 0 rgba(20,20,20,0.2), 0 12px 26px rgba(20,20,20,0.16); }
+body.heat-hot    { --shadow-card: 0 3px 0 var(--theme-secondary), 0 16px 32px rgba(20,20,20,0.2); }
+body.heat-onfire { --shadow-card: 0 4px 0 var(--theme-primary), 0 20px 44px rgba(20,20,20,0.26); }
+
+body.heat-hot .hud__value--score,
+body.heat-onfire .hud__value--score { font-size: 1.45rem; }
+
+body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
+
+
+/* ============================================================================
+   18  ACCESSIBILITY HELPERS
+   ========================================================================== */
+:focus-visible { outline: var(--focus-ring); outline-offset: 3px; border-radius: 4px; }
+:focus:not(:focus-visible) { outline: none; }
+
+
+/* ============================================================================
+   19  RESPONSIVE
+   Mobile-first above. No horizontal page scroll at any width.
+   ========================================================================== */
+@media (min-width: 768px) {
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .type-grid { grid-template-columns: repeat(2, 1fr); }
+  .site-nav__brand { font-size: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  /* Home becomes two columns: hero | Today's Archive */
+  .home { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
+  .type-grid { grid-template-columns: repeat(3, 1fr); }   /* 5 challenge types: 3 + 2 */
+}
+
+/* ---- Game page: stack the card row and the action row on small screens ---- */
+@media (max-width: 720px) {
+  .order-list { grid-auto-flow: row; }
+  .challenge__actions { flex-direction: column; align-items: stretch; }
+  .challenge__decide { width: 100%; }
+  .btn--lock { width: 100%; }
+}
+
+@media (max-width: 900px) {
+  /* VHS case interior stacks */
+  .vhs-case { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .vhs-case__poster, .vhs-case__info, .vhs-case__footer { grid-column: 1; }
+  .vhs-case__poster { grid-row: 1; max-width: 260px; }
+  .vhs-case__info { grid-row: 2; }
+  .vhs-case__footer { grid-row: 3; }
+}
+
+@media (max-width: 600px) {
+  .site-nav__inner { flex-direction: column; align-items: stretch; gap: var(--space-1); }
+  .site-nav__links { justify-content: space-between; }
+  .site-nav__links a { flex: 1; text-align: center; }
+}
+
+@media (max-width: 420px) {
+  main { padding-inline: var(--space-2); }
+}
+
+
+/* ============================================================================
+   20  REDUCED MOTION
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tape-label,
+  .tape-artifact,
+  .feedback__stamp,
+  body.heat-onfire .tape-label { transform: none; }
+  .feedback__box--wrong { animation: none; }
+  .round-countdown__num--pop { animation: none; }
+  .order-card--dragging { transform: none; }
+  body { background-attachment: scroll; }
+}

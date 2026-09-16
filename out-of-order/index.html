@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OUT OF ORDER — Daily pop-culture timeline game</title>
+  <meta name="description" content="A daily pop-culture timeline arcade game. Put Movies & TV history in order, build streaks, take risks.">
+
+  <!-- Google Fonts: Bungee (display) · Space Grotesk (UI) · Permanent Marker (handwriting).
+       Each has a system fallback declared in css/style.css. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-home">
+
+  <!-- worn cinema filmstrip along the very top -->
+  <div class="filmstrip" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       SHARED NAVIGATION  (identical markup on every page)
+       ============================================================ -->
+  <nav class="site-nav" aria-label="Main">
+    <div class="site-nav__inner">
+      <a class="site-nav__brand" href="index.html">
+        <img class="site-nav__logo" src="assets/images/logo.png" alt="" width="34" height="34">
+        OUT OF ORDER
+      </a>
+      <ul class="site-nav__links">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="game.html">Play</a></li>
+        <li><a href="how-to-play.html">How to Play</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- black "video archive" strip (Home only) -->
+  <div class="archive-bar">
+    <div class="archive-bar__inner">
+      <div class="archive-bar__list">
+        <span>O.O. Video Archive</span>
+        <span>Daily Rental</span>
+        <span>Movies + TV</span>
+      </div>
+      <div class="archive-bar__now">Tonight's Tape &middot; <span data-theme-name>Horror</span></div>
+    </div>
+  </div>
+
+  <main class="home" id="main">
+
+    <!-- ============================================================
+         LEFT COLUMN — hero
+         ============================================================ -->
+    <section class="home__hero">
+
+      <div class="home__kicker">
+        <span class="tape-label tape-label--red">Daily Rental</span>
+        <span class="home__kicker-note">A pop-culture arcade</span>
+      </div>
+
+      <h1 class="home__title"><span>OUT OF</span><span>ORDER</span></h1>
+      <div class="home__rule" aria-hidden="true"></div>
+
+      <p class="home__pitch">Do you remember what came first?</p>
+
+      <div class="home__actions">
+        <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
+        <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
+      </div>
+      <p class="meta home__cta-note">New tape every day &middot; new theme &middot; new challenges</p>
+
+      <!-- Beta Theme switcher — hidden unless the URL has ?beta=true.
+           This is the ONLY way to change the edition; the shelf below is
+           decorative for everyone. -->
+      <div class="beta-theme" data-beta-theme hidden>
+        <span class="meta beta-theme__label">Beta Theme &middot; testers only</span>
+        <div class="beta-theme__buttons">
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="horror" aria-pressed="false">Horror</button>
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="sci-fi" aria-pressed="false">Sci-Fi</button>
+        </div>
+      </div>
+
+      <!-- personal best -->
+      <section class="best" aria-labelledby="best-heading">
+        <p class="section-label best__head" id="best-heading">Personal Best &middot; O.O. Member Record</p>
+        <div class="best__body" data-personal-best aria-live="polite">
+          <p class="best__none">No record yet &mdash;</p>
+          <p class="best__hint">play today to set your first score.</p>
+        </div>
+      </section>
+
+      <!-- category shelf -->
+      <div class="home__archive-shelf">
+        <p class="meta">O.O. Video Archive &middot; Shelf A</p>
+        <div class="shelf__wrap">
+          <div class="shelf" data-shelf role="group" aria-label="Archive shelf — today's tape is highlighted"></div>
+        </div>
+        <span class="tape-label tape-label--cream">Be kind. Rewind. &#9786;</span>
+      </div>
+
+      <!-- My Archive: Beta collectibles, unlocked with Archive Tokens via a Mystery Tape -->
+      <section class="archive-collection" aria-labelledby="archive-collection-heading">
+        <p class="section-label" id="archive-collection-heading">My Archive &middot; Beta Collector's Shelf</p>
+        <p class="archive-collection__status" data-collection-status>0 Beta items found — more coming soon.</p>
+        <p class="meta archive-collection__tokens">
+          <img class="archive-collection__token-icon" src="assets/images/token.png" alt="" aria-hidden="true">
+          Archive Tokens: <strong data-tokens-home-balance>0</strong>
+        </p>
+        <div class="archive-collection__grid" data-collection-grid></div>
+      </section>
+
+    </section>
+
+    <!-- ============================================================
+         RIGHT COLUMN — Today's Archive (VHS case)
+         ============================================================ -->
+    <section class="archive-panel" aria-labelledby="archive-heading">
+      <h2 id="archive-heading" class="sr-only">Today's archive</h2>
+
+      <div class="vhs-case">
+        <span class="tape-label tape-label--archive tape-label--stuck">Today's Tape</span>
+
+        <div class="vhs-case__poster">
+          <!-- JS fills the theme; CSS draws the fallback; a real image layers on top if it loads -->
+          <div class="poster poster--hero" data-poster-role="theme">
+            <span class="poster__stripe" aria-hidden="true"></span>
+            <span class="poster__icon" data-poster-icon aria-hidden="true"></span>
+            <span class="poster__initial" data-poster-initial aria-hidden="true">H</span>
+          </div>
+          <span class="tape-label tape-label--stuck" data-theme-name>Horror</span>
+        </div>
+
+        <div class="vhs-case__info">
+          <p class="meta vhs-case__date" data-today-date>Wed &middot; Sep 2</p>
+          <p class="vhs-case__theme" data-theme-name>Horror</p>
+          <p class="vhs-case__tagline">A new genre every day</p>
+          <p class="meta vhs-case__mix">7 themed challenges &middot; 3 Archive Wildcards</p>
+          <p class="meta vhs-case__motifs" data-theme-motifs>Static &middot; Moons &middot; Shadows</p>
+
+          <div class="vhs-case__facts">
+            <span class="fact"><strong>10</strong>Challenges</span>
+            <span class="fact"><strong>&asymp; 3</strong>Minutes</span>
+          </div>
+
+          <p class="meta">Movies + TV</p>
+          <p class="meta vhs-case__hint">Memory detected &middot; <span data-theme-hint>The Shining</span></p>
+        </div>
+
+        <div class="vhs-case__footer">
+          <div class="vhs-case__print meta">
+            <span>O.O. Video Archive</span>
+            <span data-tape-code>E-180</span>
+            <span class="vhs-case__vhs">VHS</span>
+          </div>
+          <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
+        </div>
+      </div>
+
+      <!-- Memory of the Day: one rotating title (from the shared engine) -->
+      <p class="memory" data-spotlight>
+        <span class="meta memory__label">Memory of the Day</span>
+        <span class="memory__title" data-spotlight-title>Stranger Things</span>
+        <span class="meta memory__meta"><span data-spotlight-meta>Series</span> &middot; O.O. Archive <span data-spotlight-id>0913</span></span>
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="retro-stripe retro-stripe--thin" aria-hidden="true"></div>
+    <p>OUT OF ORDER &middot; Modern interface. VHS memories. New theme every day.</p>
+  </footer>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

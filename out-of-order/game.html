@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play — OUT OF ORDER</title>
+  <meta name="description" content="Today's OUT OF ORDER daily run: 10 rounds of pop-culture timeline challenges.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-game">
+
+  <div class="filmstrip" aria-hidden="true"></div>
+
+  <nav class="site-nav" aria-label="Main">
+    <div class="site-nav__inner">
+      <a class="site-nav__brand" href="index.html">
+        <img class="site-nav__logo" src="assets/images/logo.png" alt="" width="34" height="34">
+        OUT OF ORDER
+      </a>
+      <ul class="site-nav__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="game.html" aria-current="page">Play</a></li>
+        <li><a href="how-to-play.html">How to Play</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- black "video archive" strip — same component as Home -->
+  <div class="archive-bar">
+    <div class="archive-bar__inner">
+      <div class="archive-bar__list">
+        <span>O.O. Video Archive</span>
+        <span>Daily Rental</span>
+        <span>Movies + TV</span>
+      </div>
+      <div class="archive-bar__now">Tonight's Tape &middot; <span data-theme-name>Horror</span></div>
+    </div>
+  </div>
+
+  <main class="game" id="main">
+
+    <!-- ============================================================
+         HUD  —  a compact archive info panel
+         ============================================================ -->
+    <section class="hud" aria-label="Game status">
+      <p class="hud__brand meta">O.O. Inventory <span>&middot; Daily Rental</span></p>
+      <div class="hud__row">
+        <div class="hud__group">
+          <div class="hud__cell">
+            <span class="hud__label" data-hud-round-label>Round</span>
+            <span class="hud__value" data-hud-round>01 / 10</span>
+          </div>
+          <div class="hud__cell">
+            <span class="hud__label">Score</span>
+            <span class="hud__value hud__value--score" data-hud-score>0</span>
+          </div>
+          <div class="hud__cell">
+            <span class="hud__label">Streak</span>
+            <span class="hud__value" data-hud-streak>&times;0</span>
+          </div>
+        </div>
+        <div class="hud__group hud__group--right">
+          <div class="hud__cell">
+            <span class="hud__label">Speed Bonus Timer</span>
+            <span class="hud__value hud__value--timer" data-hud-timer>00:15</span>
+          </div>
+          <div class="hud__cell">
+            <span class="hud__label">Speed bonus</span>
+            <span class="hud__value" data-hud-speed>+100</span>
+          </div>
+          <div class="hud__cell">
+            <span class="hud__label">Heat</span>
+            <span class="hud__value hud__heat" data-hud-heat>Calm</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- time remaining — big and visible; drains as the round's clock runs
+         down and turns red in the last 3 seconds. The exact number is also
+         in the HUD above (Timer), so this bar is decorative for screen readers. -->
+    <div class="rprogress">
+      <span class="meta rprogress__label">Time remaining</span>
+      <div class="rprogress__track" aria-hidden="true">
+        <div class="rprogress__fill" data-progress-fill style="width:100%"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         CHALLENGE PANEL  —  JS renders ORDER (and later BEFORE/AFTER, INSERT)
+         ============================================================ -->
+    <section class="challenge" aria-labelledby="challenge-heading" data-challenge>
+      <div class="challenge__head">
+        <p class="meta challenge__tag" data-challenge-tag>Today's Archive &middot; Round 01</p>
+        <span class="challenge__badge meta" data-challenge-badge>Themed Round</span>
+        <span class="challenge__count meta" data-challenge-count>3 Cards</span>
+      </div>
+
+      <h1 id="challenge-heading" class="challenge__instruction" data-challenge-instruction>Oldest &rarr; Newest</h1>
+      <p class="challenge__help" data-challenge-help>Arrange these from oldest to newest.</p>
+
+      <div class="challenge__body" data-challenge-body></div>
+
+      <div class="challenge__actions">
+        <div class="powerups" aria-label="Power-ups">
+          <button type="button" class="powerup" data-powerup="extraTime" disabled>
+            <span class="powerup__icon" aria-hidden="true">+5s</span>
+            <span class="powerup__text">+5 sec</span>
+            <span class="powerup__lock meta" data-powerup-lock>Streak &times;3</span>
+            <span class="powerup__count" data-powerup-count>0</span>
+          </button>
+          <button type="button" class="powerup" data-powerup="reveal" disabled>
+            <span class="powerup__icon" aria-hidden="true">&#9678;</span>
+            <span class="powerup__text">Reveal</span>
+            <span class="powerup__lock meta" data-powerup-lock>Streak &times;6</span>
+            <span class="powerup__count" data-powerup-count>0</span>
+          </button>
+        </div>
+
+        <div class="challenge__decide">
+          <button type="button" class="btn btn--double" data-double-down aria-pressed="false">
+            <span class="btn__risk meta" aria-hidden="true">Risk</span>
+            <span class="btn__icon" aria-hidden="true">&#9670;</span>
+            <span data-dd-label>Double Down &times;2</span>
+          </button>
+          <button type="button" class="btn btn--lock" data-submit>Submit Answer &check;</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="challenge__exit" data-exit-row>
+      <a href="index.html" data-exit>Exit challenge</a>
+    </p>
+
+    <!-- ============================================================
+         FEEDBACK  —  results pop-up, shown after every answer or a time-out
+         (hidden by default; the dimmed backdrop blocks the page until the
+         player clicks "Next challenge")
+         ============================================================ -->
+    <section class="feedback" data-feedback hidden
+             role="alertdialog" aria-modal="true" aria-labelledby="feedback-heading">
+      <div class="feedback__box">
+        <div class="feedback__strip">
+          <span class="feedback__mark" aria-hidden="true" data-feedback-mark>&check;</span>
+          <h2 id="feedback-heading" class="feedback__title" data-feedback-title>Timeline locked</h2>
+          <span class="feedback__stamp" data-feedback-stamp>Archive verified</span>
+        </div>
+        <!-- Timeline rounds only: "2 / 3 relationships correct" -->
+        <p class="feedback__subtitle" data-feedback-subtitle hidden></p>
+
+        <ol class="feedback__timeline" data-feedback-timeline></ol>
+
+        <table class="breakdown">
+          <tbody>
+            <tr><th scope="row">Base</th><td data-bd-base>+100</td></tr>
+            <tr><th scope="row">Speed</th><td data-bd-speed>+75</td></tr>
+            <tr data-bd-dd-row hidden><th scope="row">Double Down</th><td>&times;2</td></tr>
+            <tr class="breakdown__total"><th scope="row">Round score</th><td data-bd-total>+175</td></tr>
+          </tbody>
+        </table>
+
+        <p class="feedback__streak" data-feedback-streak>Streak &times;1</p>
+        <button type="button" class="btn btn--lock" data-next>Next challenge &rarr;</button>
+      </div>
+    </section>
+
+    <!-- polite live region: feedback, score changes, power-up unlocks -->
+    <p class="sr-live" data-live aria-live="polite"></p>
+
+    <!-- ============================================================
+         RESULTS  —  after round 10 (hidden by default)
+         ============================================================ -->
+    <section class="results" data-results hidden aria-labelledby="results-heading">
+      <h1 id="results-heading" class="results__heading">Daily Tape Complete</h1>
+
+      <p class="results__new-best tape-label tape-label--red" data-new-best hidden>New personal best!</p>
+
+      <p class="results__score" data-results-score>0</p>
+      <p class="results__score-label">points</p>
+
+      <ul class="results__stats">
+        <li><span>Correct</span><strong data-results-correct>0 / 10</strong></li>
+        <li><span>Best streak</span><strong data-results-streak>&times;0</strong></li>
+        <li><span>Double Downs won</span><strong data-results-dd>0</strong></li>
+        <li><span>Fastest answer</span><strong data-results-fastest>&mdash;</strong></li>
+      </ul>
+
+      <!-- round-by-round outcome, left = round 1 -->
+      <ol class="results__breakdown" data-results-breakdown aria-label="Round-by-round breakdown"></ol>
+
+      <p class="results__title-award" data-results-award>Casual Viewer</p>
+
+      <!-- Archive Tokens earned this run + running balance -->
+      <div class="results__tokens">
+        <p class="meta results__tokens-label">Run Reward</p>
+        <p class="results__tokens-earned">
+          <img class="results__token-icon" src="assets/images/token.png" alt="" aria-hidden="true">
+          +<span data-tokens-earned>25</span> Archive Tokens
+        </p>
+        <p class="meta">Current balance: <strong data-tokens-balance>25</strong></p>
+
+        <!-- shown only once the balance covers a Mystery Tape and a
+             collectible is still locked -->
+        <div class="results__mystery-tape" data-mystery-tape hidden>
+          <p class="results__mystery-ready">Mystery Tape Ready</p>
+          <button type="button" class="btn btn--primary" data-open-tape>Open Tape &rarr;</button>
+        </div>
+      </div>
+
+      <!-- shown once a Mystery Tape has been opened this run -->
+      <div class="results__unlocked" data-results-unlocked hidden>
+        <p class="meta results__unlocked-label">New in My Archive</p>
+        <div class="results__unlocked-items" data-results-unlocked-items></div>
+      </div>
+
+      <div class="tape-artifact" aria-label="Your archive tape">
+        <span class="tape-artifact__stripe" aria-hidden="true"></span>
+        <p class="tape-artifact__brand">OUT OF ORDER</p>
+        <p class="tape-artifact__line">Daily Run</p>
+        <p class="tape-artifact__date" data-artifact-date>SEP 03</p>
+        <p class="tape-artifact__score" data-artifact-score>SCORE 0</p>
+      </div>
+
+      <div class="results__actions">
+        <button type="button" class="btn btn--primary" data-copy-score>Copy score</button>
+        <a class="btn btn--ghost" href="index.html">Back to home</a>
+      </div>
+      <p class="results__copied" data-copied hidden>&check; Score copied</p>
+
+      <!-- optional continued play — the Daily Run above is already the
+           official, comparable score -->
+      <div class="results__encore">
+        <p class="meta">Want to keep playing?</p>
+        <button type="button" class="btn btn--ghost" data-start-encore>Start Encore Mode &rarr;</button>
+        <p class="meta results__encore-note">3 lives &middot; gets harder as you go &middot; today's score is already locked in</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ENCORE RESULTS  —  shown when Encore Mode ends (hidden by default)
+         ============================================================ -->
+    <section class="results" data-encore-results hidden aria-labelledby="encore-results-heading">
+      <h1 id="encore-results-heading" class="results__heading">Encore Over</h1>
+
+      <p class="results__score" data-encore-score>0</p>
+      <p class="results__score-label">Encore points</p>
+
+      <ul class="results__stats">
+        <li><span>Rounds played</span><strong data-encore-rounds>0</strong></li>
+        <li><span>Tokens earned</span><strong data-encore-tokens>+0</strong></li>
+      </ul>
+
+      <p class="meta results__tokens-label">Archive Tokens balance</p>
+      <p class="results__score results__score--sub" data-encore-balance>0</p>
+
+      <div class="results__actions">
+        <a class="btn btn--ghost" href="index.html">Back to home</a>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         GET READY  —  full-screen 3-2-1 shown before each round reveals
+         its cards/options. hidden by default; toggled by runCountdown().
+         ============================================================ -->
+    <div class="round-countdown" data-round-countdown hidden aria-hidden="true">
+      <span class="round-countdown__label">Get ready</span>
+      <span class="round-countdown__num" data-countdown>3</span>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="retro-stripe retro-stripe--thin" aria-hidden="true"></div>
+    <p>OUT OF ORDER &middot; Be kind. Rewind.</p>
+  </footer>
+
+  <script src="js/game.js"></script>
+</body>
+</html>

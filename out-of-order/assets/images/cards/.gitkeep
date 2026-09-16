@@ -1,0 +1,5 @@
+# Card artwork (optional). The game draws a genre-coloured CSS poster when a
+# file is missing, so these are not required.
+# Filenames match the item id in js/game.js CONTENT_ITEMS + ".png", e.g.:
+#   the-lion-king.png   shrek.png   stranger-things.png
+# Any size; the card crops to a 16:10 window (set an item `focus` to steer it).

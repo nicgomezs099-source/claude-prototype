@@ -1,0 +1,5 @@
+# Daily-theme hero artwork goes here (optional).
+# The game draws a styled CSS poster when a file is missing.
+# Expected filenames (one per theme in js/game.js THEMES):
+#   time-travel.webp  magic-fantasy.webp  digital-reality.webp  sitcoms.webp  horror.webp
+# Recommended: .webp, portrait 3:4.
