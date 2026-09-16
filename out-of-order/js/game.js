@@ -1258,7 +1258,7 @@
     text("[data-challenge-instruction]", "Oldest → Newest");
     text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", round.items.length + " Cards");
-    text("[data-challenge-help]", "Drag the cards, or use Earlier / Later, to run oldest → newest.");
+    text("[data-challenge-help]", "Drag the cards, or use Earlier / Later, to run oldest → newest  ·  Enter to submit");
 
     // persistent direction guide — user testing showed the "Oldest → Newest"
     // heading alone wasn't enough; this sits right above the cards for as
@@ -1317,8 +1317,10 @@
     li.addEventListener("keydown", function (e) {
       if (answered || counting) return;
       if (revealing && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); doReveal(li); return; }
+      if (revealing) return;
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); moveCard(li, "earlier"); }
       if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); moveCard(li, "later"); }
+      if (e.key === "Enter") { e.preventDefault(); lockAnswer(false); }
     });
     li.addEventListener("click", function () { if (revealing) doReveal(li); });
 
@@ -1413,12 +1415,12 @@
     text("[data-challenge-instruction]", "Which Came First?");
     text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "2 Titles");
-    text("[data-challenge-help]", "Tap the title that came out first.");
+    text("[data-challenge-help]", "Tap the title that came out first  ·  keys 1 / 2");
 
     body.innerHTML =
       '<div class="wcf__row">' +
-        wcfCard(round.itemA) +
-        wcfCard(round.itemB) +
+        wcfCard(round.itemA, 1) +
+        wcfCard(round.itemB, 2) +
       '</div>';
 
     loadPosterImage($('[data-wcf-card="' + round.itemA.id + '"] .poster', body), cardArtSrc(round.itemA), round.itemA.focus);
@@ -1432,13 +1434,14 @@
     $("[data-submit]").disabled = true;   // enabled once a choice is made
   }
 
-  function wcfCard(item) {
+  function wcfCard(item, num) {
     return '<button type="button" class="wcf-card" data-wcf-card="' + item.id + '"' +
              ' style="--card-color:' + genreColor(item.category) + '" aria-pressed="false">' +
              '<div class="wcf-card__art poster" data-card-art>' + posterInner(item) +
                '<span class="wcf-card__mark" data-wcf-mark aria-hidden="true"></span>' +
              '</div>' +
-             '<p class="wcf-card__title">' + titleWithVersion(item) + '</p>' +
+             '<p class="wcf-card__title"><span class="card-num" aria-hidden="true">' + num + '</span>' +
+               titleWithVersion(item) + '</p>' +
              '<p class="meta wcf-card__cat">' + item.category + '</p>' +
              yearTag(item) +
            '</button>';
@@ -1453,6 +1456,7 @@
       btn.classList.toggle("wcf-card--on", on);
     });
     $("[data-submit]").disabled = false;
+    $("[data-submit]").focus();
     announce(itemById(id).title + " selected.");
   }
 
@@ -1461,6 +1465,13 @@
     if (!wcfChoice) return false;
     var earlier = round.itemA.year <= round.itemB.year ? round.itemA : round.itemB;
     return wcfChoice === earlier.id;
+  }
+
+  /* keyboard 1 / 2 for which-came-first cards */
+  function wcfKey(n) {
+    if (answered || counting || currentRound().type !== "which-first") return;
+    var btn = $all("[data-wcf-card]")[n - 1];
+    if (btn && !btn.disabled) setWcfChoice(btn.getAttribute("data-wcf-card"));
   }
 
 
@@ -1474,7 +1485,7 @@
     text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "Timeline");
     text("[data-challenge-help]",
-      "Tap a gap to drop " + round.card.title + " into the timeline  ·  oldest → newest");
+      "Tap a gap to drop " + round.card.title + " into the timeline  ·  oldest → newest  ·  number keys pick a gap");
 
     var html =
       '<div class="insert-card">' +
@@ -1529,11 +1540,19 @@
       btn.classList.toggle("insert-slot--on", parseInt(btn.getAttribute("data-slot"), 10) === slot);
     });
     $("[data-submit]").disabled = false;
+    $("[data-submit]").focus();
     announce("Gap " + (slot + 1) + " selected.");
   }
 
   function checkInsertAnswer() {
     return insertChoice === currentRound().correctSlot;
+  }
+
+  /* keyboard 1-9 for insert gap slots */
+  function insertKey(n) {
+    if (answered || counting || currentRound().type !== "insert") return;
+    var btn = $all("[data-slot]")[n - 1];
+    if (btn && !btn.disabled) setInsertChoice(parseInt(btn.getAttribute("data-slot"), 10));
   }
 
 
@@ -1594,6 +1613,7 @@
       btn.classList.toggle("quote-option--on", on);
     });
     $("[data-submit]").disabled = false;
+    $("[data-submit]").focus();
     announce(title + " selected.");
   }
 
@@ -1619,10 +1639,10 @@
     text("[data-challenge-instruction]", "Odd One Out");
     text("[data-submit]", "Submit Answer ✓");
     text("[data-challenge-count]", "4 Titles");
-    text("[data-challenge-help]", round.set.prompt + " Tap the one that doesn't belong.");
+    text("[data-challenge-help]", round.set.prompt + " Tap the one that doesn't belong.  ·  keys 1 / 2 / 3 / 4");
 
     var html = '<div class="ooo__grid">';
-    round.items.forEach(function (item) { html += oooCard(item); });
+    round.items.forEach(function (item, i) { html += oooCard(item, i + 1); });
     html += '</div>';
     body.innerHTML = html;
 
@@ -1638,13 +1658,14 @@
     $("[data-submit]").disabled = true;
   }
 
-  function oooCard(item) {
+  function oooCard(item, num) {
     return '<button type="button" class="ooo-card" data-ooo-card="' + item.id + '"' +
              ' style="--card-color:' + genreColor(item.category) + '" aria-pressed="false">' +
              '<div class="ooo-card__art poster" data-card-art>' + posterInner(item) +
                '<span class="ooo-card__mark" data-ooo-mark aria-hidden="true"></span>' +
              '</div>' +
-             '<p class="ooo-card__title">' + titleWithVersion(item) + '</p>' +
+             '<p class="ooo-card__title"><span class="card-num" aria-hidden="true">' + num + '</span>' +
+               titleWithVersion(item) + '</p>' +
            '</button>';
   }
 
@@ -1657,11 +1678,19 @@
       btn.classList.toggle("ooo-card--on", on);
     });
     $("[data-submit]").disabled = false;
+    $("[data-submit]").focus();
     announce(itemById(id).title + " selected.");
   }
 
   function checkOddOneOutAnswer() {
     return oooChoice === currentRound().set.answer;
+  }
+
+  /* keyboard 1-4 for odd-one-out cards */
+  function oooKey(n) {
+    if (answered || counting || currentRound().type !== "odd-one-out") return;
+    var btn = $all("[data-ooo-card]")[n - 1];
+    if (btn && !btn.disabled) setOooChoice(btn.getAttribute("data-ooo-card"));
   }
 
 
@@ -1714,6 +1743,7 @@
       btn.classList.toggle("pixel-scene-opt--on", on);
     });
     $("[data-submit]").disabled = false;
+    $("[data-submit]").focus();
     announce(title + " selected.");
   }
 
@@ -1887,7 +1917,7 @@
     if (!revealing) return;
     revealing = false;
     $("[data-order-list]").classList.remove("order-list--revealing");
-    text("[data-challenge-help]", "Drag the cards, or use Earlier / Later, to run oldest → newest.");
+    text("[data-challenge-help]", "Drag the cards, or use Earlier / Later, to run oldest → newest  ·  Enter to submit");
     spendReveal(card.getAttribute("data-id"));
   }
 
@@ -2555,14 +2585,33 @@
       }
     });
 
-    // keyboard shortcut: 1 / 2 / 3 for QUOTE and PIXEL SCENE options (every
-    // other type is answered by Tab-ing to a card and pressing Enter/Space)
+    // keyboard shortcut: number keys 1-9 pick an option/card/gap for every
+    // "pick one" challenge type. ORDER (Timeline) is reordered with the
+    // arrow keys instead (see buildCard's own keydown handler).
     document.addEventListener("keydown", function (e) {
       if (answered || counting) return;
-      if (e.key !== "1" && e.key !== "2" && e.key !== "3") return;
+
+      // Enter submits once the Submit Answer button has focus (it's
+      // auto-focused right after a choice is made — see setWcfChoice() etc.
+      // below). Written as a direct call rather than relying on the
+      // browser's own "Enter activates the focused button" behavior, so it
+      // works the same way as ORDER's own Enter handling in buildCard().
+      if (e.key === "Enter") {
+        if (document.activeElement === $("[data-submit]") && canLock()) {
+          e.preventDefault();
+          lockAnswer(false);
+        }
+        return;
+      }
+
+      if (e.key.length !== 1 || e.key < "1" || e.key > "9") return;
+      var n = parseInt(e.key, 10);
       var t = currentRound().type;
-      if (t === "quote") { e.preventDefault(); quoteKey(parseInt(e.key, 10)); }
-      else if (t === "pixel-scene") { e.preventDefault(); sceneKey(parseInt(e.key, 10)); }
+      if (t === "quote") { e.preventDefault(); quoteKey(n); }
+      else if (t === "pixel-scene") { e.preventDefault(); sceneKey(n); }
+      else if (t === "which-first") { e.preventDefault(); wcfKey(n); }
+      else if (t === "odd-one-out") { e.preventDefault(); oooKey(n); }
+      else if (t === "insert") { e.preventDefault(); insertKey(n); }
     });
     on("[data-double-down]", "click", toggleDoubleDown);
     on("[data-copy-score]", "click", copyScore);

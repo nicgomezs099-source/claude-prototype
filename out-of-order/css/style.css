@@ -1227,6 +1227,22 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 .order-list--revealing .order-card { cursor: pointer; outline: 2px dashed var(--color-cyan); outline-offset: 2px; }
 
 
+/* small numbered circle in front of a card title — shown on WHICH CAME
+   FIRST and ODD ONE OUT cards so the on-screen number matches the
+   keyboard shortcut that picks that card. */
+.card-num {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem; height: 1.4rem;
+  margin-right: 0.35em;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-bg);
+  vertical-align: middle;
+}
+
 /* ---- MECHANIC 02 : WHICH CAME FIRST ----
    Two title cards. Tap the one that came out first, then Submit Answer.
    (Was Before/After — the drag tag is gone, the question is now always
