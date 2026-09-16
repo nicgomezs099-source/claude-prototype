@@ -51,9 +51,9 @@
   <main class="home" id="main">
 
     <!-- ============================================================
-         LEFT COLUMN — hero
+         HERO INTRO — brand, pitch, CTAs. Always first, on every width.
          ============================================================ -->
-    <section class="home__hero">
+    <section class="home__intro">
 
       <div class="home__kicker">
         <span class="tape-label tape-label--red">Daily Rental</span>
@@ -71,50 +71,12 @@
       </div>
       <p class="meta home__cta-note">New tape every day &middot; new theme &middot; new challenges</p>
 
-      <!-- Beta Theme switcher — hidden unless the URL has ?beta=true.
-           This is the ONLY way to change the edition; the shelf below is
-           decorative for everyone. -->
-      <div class="beta-theme" data-beta-theme hidden>
-        <span class="meta beta-theme__label">Beta Theme &middot; testers only</span>
-        <div class="beta-theme__buttons">
-          <button type="button" class="beta-theme__btn" data-beta-theme-btn="horror" aria-pressed="false">Horror</button>
-          <button type="button" class="beta-theme__btn" data-beta-theme-btn="sci-fi" aria-pressed="false">Sci-Fi</button>
-        </div>
-      </div>
-
-      <!-- personal best -->
-      <section class="best" aria-labelledby="best-heading">
-        <p class="section-label best__head" id="best-heading">Personal Best &middot; O.O. Member Record</p>
-        <div class="best__body" data-personal-best aria-live="polite">
-          <p class="best__none">No record yet &mdash;</p>
-          <p class="best__hint">play today to set your first score.</p>
-        </div>
-      </section>
-
-      <!-- category shelf -->
-      <div class="home__archive-shelf">
-        <p class="meta">O.O. Video Archive &middot; Shelf A</p>
-        <div class="shelf__wrap">
-          <div class="shelf" data-shelf role="group" aria-label="Archive shelf — today's tape is highlighted"></div>
-        </div>
-        <span class="tape-label tape-label--cream">Be kind. Rewind. &#9786;</span>
-      </div>
-
-      <!-- My Archive: Beta collectibles, unlocked with Archive Tokens via a Mystery Tape -->
-      <section class="archive-collection" aria-labelledby="archive-collection-heading">
-        <p class="section-label" id="archive-collection-heading">My Archive &middot; Beta Collector's Shelf</p>
-        <p class="archive-collection__status" data-collection-status>0 Beta items found — more coming soon.</p>
-        <p class="meta archive-collection__tokens">
-          <img class="archive-collection__token-icon" src="assets/images/token.png" alt="" aria-hidden="true">
-          Archive Tokens: <strong data-tokens-home-balance>0</strong>
-        </p>
-        <div class="archive-collection__grid" data-collection-grid></div>
-      </section>
-
     </section>
 
     <!-- ============================================================
-         RIGHT COLUMN — Today's Archive (VHS case)
+         TODAY'S ARCHIVE (VHS case) — desktop: right column, full height.
+         mobile: right under the intro, ahead of the shelf/collection
+         below, so the day's theme doesn't get buried by scrolling.
          ============================================================ -->
     <section class="archive-panel" aria-labelledby="archive-heading">
       <h2 id="archive-heading" class="sr-only">Today's archive</h2>
@@ -165,6 +127,55 @@
         <span class="meta memory__meta"><span data-spotlight-meta>Series</span> &middot; O.O. Archive <span data-spotlight-id>0913</span></span>
       </p>
     </section>
+
+    <!-- ============================================================
+         HERO EXTRAS — beta switcher, personal best, shelf, collection.
+         Desktop: rest of the left column, under the intro. Mobile: below
+         Today's Archive above.
+         ============================================================ -->
+    <div class="home__extras">
+
+      <!-- Beta Theme switcher — hidden unless the URL has ?beta=true.
+           This is the ONLY way to change the edition; the shelf below is
+           decorative for everyone. -->
+      <div class="beta-theme" data-beta-theme hidden>
+        <span class="meta beta-theme__label">Beta Theme &middot; testers only</span>
+        <div class="beta-theme__buttons">
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="horror" aria-pressed="false">Horror</button>
+          <button type="button" class="beta-theme__btn" data-beta-theme-btn="sci-fi" aria-pressed="false">Sci-Fi</button>
+        </div>
+      </div>
+
+      <!-- personal best -->
+      <section class="best" aria-labelledby="best-heading">
+        <p class="section-label best__head" id="best-heading">Personal Best &middot; O.O. Member Record</p>
+        <div class="best__body" data-personal-best aria-live="polite">
+          <p class="best__none">No record yet &mdash;</p>
+          <p class="best__hint">play today to set your first score.</p>
+        </div>
+      </section>
+
+      <!-- category shelf -->
+      <div class="home__archive-shelf">
+        <p class="meta">O.O. Video Archive &middot; Shelf A</p>
+        <div class="shelf__wrap">
+          <div class="shelf" data-shelf role="group" aria-label="Archive shelf — today's tape is highlighted"></div>
+        </div>
+        <span class="tape-label tape-label--cream">Be kind. Rewind. &#9786;</span>
+      </div>
+
+      <!-- My Archive: Beta collectibles, unlocked with Archive Tokens via a Mystery Tape -->
+      <section class="archive-collection" aria-labelledby="archive-collection-heading">
+        <p class="section-label" id="archive-collection-heading">My Archive &middot; Beta Collector's Shelf</p>
+        <p class="archive-collection__status" data-collection-status>0 Beta items found — more coming soon.</p>
+        <p class="meta archive-collection__tokens">
+          <img class="archive-collection__token-icon" src="assets/images/token.png" alt="" aria-hidden="true">
+          Archive Tokens: <strong data-tokens-home-balance>0</strong>
+        </p>
+        <div class="archive-collection__grid" data-collection-grid></div>
+      </section>
+
+    </div>
 
   </main>
 

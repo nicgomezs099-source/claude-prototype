@@ -710,19 +710,32 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 /* ============================================================================
    14  HOME PAGE
    Two columns on desktop: hero (left) + Today's Archive VHS case (right).
+
+   Named grid areas (not DOM order) decide where each block sits, so the
+   same three sections — intro / archive / extras — can read top-to-bottom
+   on mobile (intro, then today's theme, then the shelf/collection stuff)
+   while still forming the classic two-column layout on desktop. See the
+   "min-width: 1024px" rule below for the desktop arrangement.
    ========================================================================== */
 .home {
   display: grid;
   grid-template-columns: minmax(0, 1fr);   /* keeps children from forcing the page wide */
+  grid-template-areas:
+    "intro"
+    "archive"
+    "extras";
   gap: var(--space-4);
 }
 
-.home__hero {
+.home__intro, .home__extras {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   align-content: start;
 }
+.home__intro { grid-area: intro; }
+.home__extras { grid-area: extras; }
+.archive-panel { grid-area: archive; }
 
 .home__kicker { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .home__kicker-note {
@@ -2039,8 +2052,15 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
 }
 
 @media (min-width: 1024px) {
-  /* Home becomes two columns: hero | Today's Archive */
-  .home { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
+  /* Home becomes two columns: intro + extras stacked on the left,
+     Today's Archive as one tall card on the right. */
+  .home {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      "intro   archive"
+      "extras  archive";
+    align-items: start;
+  }
   .type-grid { grid-template-columns: repeat(3, 1fr); }   /* 5 challenge types: 3 + 2 */
 }
 
