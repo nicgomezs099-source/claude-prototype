@@ -69,6 +69,12 @@
 
       <p class="home__pitch">Do you remember what came first?</p>
 
+      <!-- desktop only — on mobile this same CTA lives at the bottom of the
+           Today's Archive card instead, see .home__actions--card below -->
+      <div class="home__actions home__actions--intro">
+        <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
+        <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
+      </div>
       <p class="meta home__cta-note">New tape every day &middot; new theme &middot; new challenges</p>
 
     </section>
@@ -108,10 +114,10 @@
           <p class="meta">Movies + TV</p>
         </div>
 
-        <!-- the one "start the game" CTA lives here now — inside the card
-             that's already telling you what today's tape is -->
+        <!-- mobile only — on desktop the CTA is the one up in the hero
+             instead, see .home__actions--intro above -->
         <div class="vhs-case__footer">
-          <div class="home__actions">
+          <div class="home__actions home__actions--card">
             <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
             <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
           </div>

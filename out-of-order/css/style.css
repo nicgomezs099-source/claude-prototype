@@ -779,6 +779,13 @@ body.theme-horror .vhs-case__footer .btn--primary { background: #DD3A47; }
 }
 
 .home__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* Two copies of the same CTA — one in the hero, one inside the VHS card —
+   and only one shows at a time. Below 1024px (the "Home becomes two
+   columns" breakpoint, see the min-width: 1024px rule further down) the
+   card's copy wins since the card already sits right under the hero on
+   mobile; above it, the hero's copy wins since the card is a side column. */
+.home__actions--intro { display: none; }
 .home__cta-note { margin-top: 0.5rem; color: rgba(20, 20, 20, 0.6); }
 
 /* ---- Beta Theme switcher — testers only, hidden unless ?beta=true ---- */
@@ -2067,6 +2074,11 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
     align-items: start;
   }
   .type-grid { grid-template-columns: repeat(3, 1fr); }   /* 5 challenge types: 3 + 2 */
+
+  /* swap which copy of the Start/How-to-play CTA is showing — see the
+     .home__actions--intro rule up in section 14 for why there are two */
+  .home__actions--intro { display: flex; }
+  .home__actions--card { display: none; }
 }
 
 /* ---- Game page: stack the card row and the action row on small screens ---- */
