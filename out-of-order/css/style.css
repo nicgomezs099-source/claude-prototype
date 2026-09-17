@@ -284,6 +284,23 @@ main {
   font-weight: 700;
 }
 
+/* hamburger button — only shown below the mobile breakpoint (see the
+   max-width: 600px rule further down); the links list stays the always-
+   visible row above it no matter what "hidden" is set to. */
+.site-nav__toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  line-height: 1;
+  background: var(--color-bg);
+  border: var(--border-ink);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 /* Black "video archive" strip under the nav (Home page). */
 .archive-bar {
   background: var(--color-ink);
@@ -2082,9 +2099,28 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
 }
 
 @media (max-width: 600px) {
-  .site-nav__inner { flex-direction: column; align-items: stretch; gap: var(--space-1); }
-  .site-nav__links { justify-content: space-between; }
-  .site-nav__links a { flex: 1; text-align: center; }
+  /* Home / Play / How to Play collapse into a hamburger menu so the two
+     redundant "start the game" CTAs already on the Home page below don't
+     get a THIRD one crowding the header too. */
+  .site-nav__toggle { display: inline-flex; }
+  .site-nav__links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    flex-direction: column;
+    gap: 0;
+    background: var(--color-bg);
+    border-bottom: var(--border-ink);
+    box-shadow: 0 10px 16px rgba(20, 20, 20, 0.18);
+  }
+  .site-nav__links[hidden] { display: none; }
+  .site-nav__links a {
+    padding: var(--space-3);
+    border-bottom: 1px solid rgba(20, 20, 20, 0.12);
+  }
+  .site-nav__links li:last-child a { border-bottom: none; }
 }
 
 @media (max-width: 420px) {

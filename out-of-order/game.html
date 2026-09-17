@@ -22,7 +22,11 @@
         <img class="site-nav__logo" src="assets/images/logo.png" alt="" width="34" height="34">
         OUT OF ORDER
       </a>
-      <ul class="site-nav__links">
+      <!-- hamburger toggle — hidden by CSS above the mobile breakpoint,
+           where the links row next to it is just always shown instead -->
+      <button type="button" class="site-nav__toggle" data-nav-toggle
+              aria-expanded="false" aria-controls="site-nav-links" aria-label="Menu">☰</button>
+      <ul class="site-nav__links" id="site-nav-links" data-nav-links hidden>
         <li><a href="index.html">Home</a></li>
         <li><a href="game.html" aria-current="page">Play</a></li>
         <li><a href="how-to-play.html">How to Play</a></li>

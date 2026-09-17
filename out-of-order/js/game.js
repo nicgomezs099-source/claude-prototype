@@ -2633,9 +2633,40 @@
 
 
   /* ==========================================================================
+     NAV  —  hamburger toggle for the shared nav (mobile only; the CSS keeps
+     the links always visible above the mobile breakpoint, so this is a
+     no-op on desktop no matter its state).
+     ======================================================================== */
+  function wireNav() {
+    var toggle = $("[data-nav-toggle]");
+    var links = $("[data-nav-links]");
+    if (!toggle || !links) return;
+
+    function closeMenu() {
+      links.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "☰";
+    }
+
+    toggle.addEventListener("click", function () {
+      var opening = links.hidden;
+      links.hidden = !opening;
+      toggle.setAttribute("aria-expanded", String(opening));
+      toggle.textContent = opening ? "✕" : "☰";
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !links.hidden) { closeMenu(); toggle.focus(); }
+    });
+  }
+
+
+  /* ==========================================================================
      INIT
      ======================================================================== */
   function initGame() {
+    wireNav();
+
     var today = new Date();
     var theme = getDailyTheme(today);
 

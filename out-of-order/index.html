@@ -28,7 +28,11 @@
         <img class="site-nav__logo" src="assets/images/logo.png" alt="" width="34" height="34">
         OUT OF ORDER
       </a>
-      <ul class="site-nav__links">
+      <!-- hamburger toggle — hidden by CSS above the mobile breakpoint,
+           where the links row next to it is just always shown instead -->
+      <button type="button" class="site-nav__toggle" data-nav-toggle
+              aria-expanded="false" aria-controls="site-nav-links" aria-label="Menu">☰</button>
+      <ul class="site-nav__links" id="site-nav-links" data-nav-links hidden>
         <li><a href="index.html" aria-current="page">Home</a></li>
         <li><a href="game.html">Play</a></li>
         <li><a href="how-to-play.html">How to Play</a></li>
@@ -110,13 +114,15 @@
           <p class="meta vhs-case__hint">Memory detected &middot; <span data-theme-hint>The Shining</span></p>
         </div>
 
+        <!-- No second "Start today's run" here on purpose — the hero above
+             already has the one CTA for starting the game; this card is
+             just previewing today's theme. -->
         <div class="vhs-case__footer">
           <div class="vhs-case__print meta">
             <span>O.O. Video Archive</span>
             <span data-tape-code>E-180</span>
             <span class="vhs-case__vhs">VHS</span>
           </div>
-          <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
         </div>
       </div>
 
