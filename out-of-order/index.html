@@ -69,10 +69,6 @@
 
       <p class="home__pitch">Do you remember what came first?</p>
 
-      <div class="home__actions">
-        <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
-        <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
-      </div>
       <p class="meta home__cta-note">New tape every day &middot; new theme &middot; new challenges</p>
 
     </section>
@@ -101,7 +97,6 @@
         <div class="vhs-case__info">
           <p class="meta vhs-case__date" data-today-date>Wed &middot; Sep 2</p>
           <p class="vhs-case__theme" data-theme-name>Horror</p>
-          <p class="vhs-case__tagline">A new genre every day</p>
           <p class="meta vhs-case__mix">7 themed challenges &middot; 3 Archive Wildcards</p>
           <p class="meta vhs-case__motifs" data-theme-motifs>Static &middot; Moons &middot; Shadows</p>
 
@@ -111,13 +106,15 @@
           </div>
 
           <p class="meta">Movies + TV</p>
-          <p class="meta vhs-case__hint">Memory detected &middot; <span data-theme-hint>The Shining</span></p>
         </div>
 
-        <!-- No second "Start today's run" here on purpose — the hero above
-             already has the one CTA for starting the game; this card is
-             just previewing today's theme. -->
+        <!-- the one "start the game" CTA lives here now — inside the card
+             that's already telling you what today's tape is -->
         <div class="vhs-case__footer">
+          <div class="home__actions">
+            <a class="btn btn--primary" href="game.html" data-start-run>Start today's run &rarr;</a>
+            <a class="btn btn--ghost" href="how-to-play.html">How to play</a>
+          </div>
           <div class="vhs-case__print meta">
             <span>O.O. Video Archive</span>
             <span data-tape-code>E-180</span>

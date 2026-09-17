@@ -627,13 +627,7 @@ main {
   color: var(--theme-primary);
   margin-top: var(--space-1);
 }
-.vhs-case__tagline {
-  font-family: var(--font-marker);
-  font-size: 1rem;
-  color: rgba(247, 239, 221, 0.9);
-  margin-top: 2px;
-}
-.vhs-case__mix { color: rgba(247, 239, 221, 0.6); margin-bottom: var(--space-1); }
+.vhs-case__mix { color: rgba(247, 239, 221, 0.6); margin-top: 2px; margin-bottom: var(--space-1); }
 .vhs-case__motifs { color: rgba(247, 239, 221, 0.75); }
 .vhs-case__facts {
   display: flex;
@@ -656,27 +650,21 @@ main {
   text-transform: none;
   color: var(--color-label);
 }
-.vhs-case__hint { color: var(--theme-secondary); }
-.vhs-case__hint::before {
-  content: "";
-  display: inline-block;
-  width: 7px; height: 7px;
-  margin-right: 0.5rem;
-  border-radius: 50%;
-  background: currentColor;
-  vertical-align: middle;
-}
-
 .vhs-case__footer {
   grid-column: 1 / -1;
   grid-row: 2;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-2);
-  align-items: center;
-  justify-content: space-between;
   padding-top: var(--space-3);
   border-top: 1px dashed rgba(247, 239, 221, 0.3);
+}
+/* the CTAs reuse .home__actions (same buttons, same class, as in the hero)
+   — on the case's dark background the ghost button needs light ink instead
+   of its default dark-on-transparent, or it'd disappear against the navy. */
+.vhs-case__footer .btn--ghost {
+  color: var(--color-label);
+  border-color: rgba(247, 239, 221, 0.6);
 }
 .vhs-case__print {
   display: flex;

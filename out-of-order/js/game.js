@@ -58,14 +58,12 @@
       id: "horror", name: "Horror", bodyClass: "theme-horror",
       initial: "H", icon: "horror", tapeCode: "E-180",
       motifs: "Do you want to play a game?",
-      hint: "Saw",
       hero: "assets/images/themes/horror.jpg"
     },
     {
       id: "sci-fi", name: "Sci-Fi", bodyClass: "theme-sci-fi",
       initial: "S", icon: "scifi", tapeCode: "T-120",
       motifs: "Starships · Aliens · Distant Worlds",
-      hint: "Star Wars",
       hero: "assets/images/themes/sci-fi.jpg"
     }
   ];
@@ -527,7 +525,6 @@
 
     $all("[data-theme-name]").forEach(function (el) { el.textContent = theme.name; });
     $all("[data-theme-motifs]").forEach(function (el) { el.textContent = theme.motifs; });
-    $all("[data-theme-hint]").forEach(function (el) { el.textContent = theme.hint; });
     $all("[data-today-date]").forEach(function (el) { el.textContent = formatToday(date); });
     $all("[data-tape-code]").forEach(function (el) { el.textContent = theme.tapeCode; });
     $all("[data-tape-date]").forEach(function (el) { el.textContent = formatTapeDate(date); });
