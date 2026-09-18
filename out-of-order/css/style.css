@@ -1148,7 +1148,7 @@ body.page-game main { padding-top: 1.25rem; }
 }
 
 .order-list {
-  max-width: 640px;
+  max-width: min(920px, 68vh);
   margin-inline: auto;
   display: grid;
   gap: var(--space-2);
@@ -1193,7 +1193,7 @@ body.page-game main { padding-top: 1.25rem; }
   border: 0;
   border-radius: 0;
   border-bottom: 2px solid var(--color-ink);
-  aspect-ratio: 21 / 9;
+  aspect-ratio: 16 / 10;
 }
 /* genre-coloured fallback poster (hidden once a real image loads on top) */
 .order-card__art::before {
@@ -1540,7 +1540,7 @@ body.page-game main { padding-top: 1.25rem; }
    4 titles in a 2x2 grid at every width (never 1 column) — tap the one
    that doesn't belong. */
 .ooo__grid {
-  max-width: 480px;
+  max-width: min(620px, 44vh);
   margin-inline: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1565,7 +1565,7 @@ body.page-game main { padding-top: 1.25rem; }
 }
 .ooo-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
 .ooo-card:disabled { cursor: not-allowed; }
-.ooo-card__art { aspect-ratio: 3 / 1; border: var(--border-ink); border-radius: 6px; }
+.ooo-card__art { aspect-ratio: 16 / 9; border: var(--border-ink); border-radius: 6px; }
 .ooo-card__art::before {
   background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
   opacity: 1;
@@ -1596,12 +1596,11 @@ body.page-game main { padding-top: 1.25rem; }
 
 /* ---- MECHANIC 06 : PIXEL SCENE ("Recognize This Scene?") ----
    One large supplied image + 3 answer options, styled exactly like QUOTE
-   (same options list, an image instead of a line of dialogue). A max-width
-   keeps the whole thing readable at a glance instead of stretching to the
-   full challenge-panel width and pushing the options/Submit off-screen —
-   the mobile rule further down narrows it more for small phones. */
+   (same options list, an image instead of a line of dialogue). Mobile
+   keeps this small and centered (see the max-width: 640px rule further
+   down); the min-width: 641px rule below puts it side by side with its
+   options instead, so it can grow much bigger without adding height. */
 .pixel-scene {
-  max-width: 150px;
   margin: 0 auto;
   border: var(--border-ink);
   border-radius: 8px;
@@ -2193,6 +2192,7 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   /* ORDER: smaller poster, title and meta strip; the Earlier/Later
      buttons keep their 44px touch target, just tighter padding around it */
   .order-card__meta { padding: 0.3rem 0.4rem; font-size: 0.56rem; }
+  .order-card__art { aspect-ratio: 2 / 1; }
   .order-card__title { font-size: 0.8rem; padding: 0.35rem 0.4rem 0.2rem; line-height: 1.1; }
   .order-card__controls { padding: 0.3rem; gap: 0.25rem; }
   .order-card__move { min-height: 44px; padding: 0.3rem 0.2rem; font-size: 0.62rem; gap: 0.2rem; }
@@ -2204,16 +2204,50 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   .wcf-card__title { font-size: 1.05rem; }
   .ooo__grid { max-width: none; gap: 0.5rem; }
   .ooo-card { padding: 0.35rem; border-top-width: 5px; }
+  .ooo-card__art { aspect-ratio: 3 / 1; }
   .ooo-card__title { font-size: 0.78rem; padding: 0.3rem 0.15rem 0.05rem; }
 
-  /* PIXEL SCENE now caps at 150px in the base rule above (section 06),
-     which already covers mobile — nothing extra needed here. */
+  /* PIXEL SCENE: small and centered on mobile — the desktop side-by-side
+     layout only kicks in at min-width: 641px (section 06 below). */
+  .pixel-scene { max-width: 150px; }
 
   /* QUOTE + PIXEL SCENE option buttons: still above the 44px floor */
   .quote-option, .pixel-scene-opt { min-height: 46px; padding: 0.4rem 0.7rem; font-size: 0.9rem; }
   .quote-option__letter, .pixel-scene-opt__letter { width: 1.5rem; height: 1.5rem; }
   .pixel-scene-options, .quote-options { gap: 0.5rem; margin-top: 0.6rem; }
   .quote { padding: 0.8rem; font-size: 0.95rem; }
+}
+
+/* ---- Desktop only: QUOTE and PIXEL SCENE go side by side instead of
+   stacked — the image/quote on the left, its answer options on the right
+   — so the image can be much bigger without pushing Submit off-screen.
+   Mobile keeps the stacked layout from the max-width: 640px rule above. */
+@media (min-width: 641px) {
+  .challenge__body--pixel-scene,
+  .challenge__body--quote {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .challenge__body--pixel-scene .pixel-scene {
+    flex: 1 1 auto;
+    max-width: min(600px, 56vh, 100%);
+    margin: 0;
+  }
+  .challenge__body--pixel-scene .pixel-scene-options {
+    flex: 0 1 380px;
+    margin-top: 0;
+    align-self: stretch;
+    align-content: center;
+  }
+  .challenge__body--quote .quote {
+    flex: 1 1 55%;
+    margin: 0;
+  }
+  .challenge__body--quote .quote-options {
+    flex: 1 1 40%;
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 900px) {
