@@ -1148,7 +1148,7 @@ body.page-game main { padding-top: 1.25rem; }
 }
 
 .order-list {
-  max-width: min(920px, 68vh);
+  max-width: 640px;
   margin-inline: auto;
   display: grid;
   gap: var(--space-2);
@@ -1193,7 +1193,7 @@ body.page-game main { padding-top: 1.25rem; }
   border: 0;
   border-radius: 0;
   border-bottom: 2px solid var(--color-ink);
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 21 / 9;
 }
 /* genre-coloured fallback poster (hidden once a real image loads on top) */
 .order-card__art::before {
@@ -1540,7 +1540,7 @@ body.page-game main { padding-top: 1.25rem; }
    4 titles in a 2x2 grid at every width (never 1 column) — tap the one
    that doesn't belong. */
 .ooo__grid {
-  max-width: min(620px, 44vh);
+  max-width: 480px;
   margin-inline: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1565,7 +1565,7 @@ body.page-game main { padding-top: 1.25rem; }
 }
 .ooo-card:hover:not(:disabled) { transform: translate(-1px, -1px); }
 .ooo-card:disabled { cursor: not-allowed; }
-.ooo-card__art { aspect-ratio: 16 / 9; border: var(--border-ink); border-radius: 6px; }
+.ooo-card__art { aspect-ratio: 3 / 1; border: var(--border-ink); border-radius: 6px; }
 .ooo-card__art::before {
   background: linear-gradient(150deg, var(--card-color, var(--color-coral)) 0 55%, rgba(20, 20, 20, 0.55) 55% 100%);
   opacity: 1;
@@ -2204,7 +2204,6 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   .wcf-card__title { font-size: 1.05rem; }
   .ooo__grid { max-width: none; gap: 0.5rem; }
   .ooo-card { padding: 0.35rem; border-top-width: 5px; }
-  .ooo-card__art { aspect-ratio: 3 / 1; }
   .ooo-card__title { font-size: 0.78rem; padding: 0.3rem 0.15rem 0.05rem; }
 
   /* PIXEL SCENE: small and centered on mobile — the desktop side-by-side
