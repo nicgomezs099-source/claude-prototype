@@ -340,8 +340,8 @@
   var PIXEL_SCENES = [
     { id: "scene-it-cornfield", image: "assets/images/scenes/it-cornfield.png",
       answer: "It", options: ["It", "Halloween", "Scream"], themes: ["horror"] },
-    { id: "scene-it-closeup", image: "assets/images/scenes/it-closeup.png",
-      answer: "It", options: ["It", "The Conjuring", "Hereditary"], themes: ["horror"] },
+    { id: "scene-conjuring-closeup", image: "assets/images/scenes/conjuring-closeup.png",
+      answer: "The Conjuring", options: ["It", "The Conjuring", "Hereditary"], themes: ["horror"] },
     { id: "scene-back-to-the-future", image: "assets/images/scenes/back-to-the-future-01.png",
       answer: "Back to the Future", options: ["Back to the Future", "E.T. the Extra-Terrestrial", "Close Encounters of the Third Kind"], themes: ["sci-fi"] },
     { id: "scene-inception", image: "assets/images/scenes/inception-top.png",
