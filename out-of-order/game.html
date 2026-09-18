@@ -70,11 +70,11 @@
         </div>
         <div class="hud__group hud__group--right">
           <div class="hud__cell">
-            <span class="hud__label">Speed Bonus Timer</span>
+            <span class="hud__label">Timer</span>
             <span class="hud__value hud__value--timer" data-hud-timer>00:15</span>
           </div>
           <div class="hud__cell">
-            <span class="hud__label">Speed bonus</span>
+            <span class="hud__label">Bonus</span>
             <span class="hud__value" data-hud-speed>+100</span>
           </div>
           <div class="hud__cell">
@@ -268,11 +268,15 @@
     </section>
 
     <!-- ============================================================
-         GET READY  —  full-screen 3-2-1 shown before each round reveals
-         its cards/options. hidden by default; toggled by runCountdown().
+         GET READY  —  full-screen 10-1 countdown shown before each round
+         reveals its cards/options, previewing what's coming so it's never
+         a surprise. hidden by default; toggled by runCountdown().
          ============================================================ -->
     <div class="round-countdown" data-round-countdown hidden aria-hidden="true">
       <span class="round-countdown__label">Get ready</span>
+      <p class="round-countdown__next meta">Next challenge</p>
+      <h2 class="round-countdown__title" data-countdown-title>Odd One Out</h2>
+      <p class="round-countdown__desc" data-countdown-desc>Tap the one that doesn't belong.</p>
       <span class="round-countdown__num" data-countdown>3</span>
     </div>
 

@@ -1112,21 +1112,29 @@
     runCountdown(startTimer);
   }
 
-  /* ---- 3-2-1 intro ------------------------------------------------------
+  /* ---- 10-1 intro --------------------------------------------------------
      A full-screen "Get ready" pop-up covers the whole page — the round's
-     cards/options are already rendered underneath, just not visible yet.
-     One full second per number (a real 3-2-1, not a quick blink), then it
+     cards/options are already rendered underneath (renderChallenge() ran
+     right before this), so the challenge title and help text are already
+     set; this just mirrors them onto the countdown so nobody is caught off
+     guard by a new round type. One full second per number, then it
      disappears and `done` runs (starts the soft timer). */
   function runCountdown(done) {
     if (countdownId) window.clearTimeout(countdownId);
     counting = true;
     setChallengeControls(true);        // disable Lock / power-ups / Double Down
 
+    var title = $("[data-challenge-instruction]").textContent;
+    var desc = $("[data-challenge-help]").textContent;
+    text("[data-countdown-title]", title);
+    text("[data-countdown-desc]", desc);
+    announce("Next challenge: " + title + ". " + desc);
+
     var overlay = $("[data-round-countdown]");
     var el = $("[data-countdown]");
     overlay.hidden = false;
 
-    var sequence = ["3", "2", "1"];
+    var sequence = ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"];
     var i = 0;
     var step = 1000;   // one second per number
 
