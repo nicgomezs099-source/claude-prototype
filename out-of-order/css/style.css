@@ -1064,9 +1064,21 @@ body.page-game main { padding-top: 1.25rem; }
   text-transform: uppercase;
   color: var(--color-coral);
 }
-.round-countdown__next {
+/* the preview card — cream against the black backdrop, like every other
+   card in the game, so the text that matters (what's coming next) reads
+   clearly instead of floating small and grey on black */
+.round-countdown__card {
   margin-top: var(--space-2);
-  color: rgba(247, 239, 221, 0.55);
+  max-width: 30em;
+  padding: 1.1rem 1.5rem;
+  background: var(--color-label);
+  border: var(--border-ink);
+  border-top: 8px solid var(--theme-primary, var(--color-coral));
+  border-radius: 12px;
+  box-shadow: var(--shadow-hard);
+}
+.round-countdown__next {
+  color: rgba(20, 20, 20, 0.55);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -1074,14 +1086,15 @@ body.page-game main { padding-top: 1.25rem; }
 }
 .round-countdown__title {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 5vw, 2.1rem);
+  font-size: clamp(1.8rem, 7vw, 2.8rem);
   line-height: 1.05;
-  color: var(--color-bg);
+  margin-top: 0.3rem;
+  color: var(--color-ink);
 }
 .round-countdown__desc {
-  max-width: 32em;
-  color: rgba(247, 239, 221, 0.8);
-  font-size: 0.92rem;
+  margin-top: 0.5rem;
+  color: rgba(20, 20, 20, 0.75);
+  font-size: 1.05rem;
   line-height: 1.4;
 }
 .round-countdown__num {
