@@ -287,7 +287,7 @@
       answer: "Finding Nemo", options: ["Finding Nemo", "Shark Tale", "The Little Mermaid"],
       themes: [], year: 2003 },
     { id: "q-buzz",     quote: "To infinity and beyond!",
-      answer: "Toy Story", options: ["Toy Story", "Buzz Lightyear", "The Incredibles"],
+      answer: "Toy Story", options: ["Toy Story", "Star Wars", "The Incredibles"],
       themes: [], year: 1995 },
     { id: "q-got",      quote: "Winter is coming.",
       answer: "Game of Thrones", options: ["Game of Thrones", "The Lord of the Rings", "Vikings"],
