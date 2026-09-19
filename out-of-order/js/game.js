@@ -54,20 +54,20 @@
      and its shelf spine automatically becomes a switch button.
      ======================================================================== */
   /* Order here decides which theme falls on which calendar day (see
-     getDailyTheme() below) — day-2 (even dayNumber) is always THEMES[0].
-     Sci-Fi listed first so today lands on Sci-Fi for presentation day. */
+     getDailyTheme() below) — every even dayNumber is always THEMES[0].
+     Horror listed first so today (an odd dayNumber) lands on Sci-Fi. */
   var THEMES = [
-    {
-      id: "sci-fi", name: "Sci-Fi", bodyClass: "theme-sci-fi",
-      initial: "S", icon: "scifi", tapeCode: "T-120",
-      motifs: "Starships · Aliens · Distant Worlds",
-      hero: "assets/images/themes/sci-fi.jpg"
-    },
     {
       id: "horror", name: "Horror", bodyClass: "theme-horror",
       initial: "H", icon: "horror", tapeCode: "E-180",
       motifs: "Do you want to play a game?",
       hero: "assets/images/themes/horror.jpg"
+    },
+    {
+      id: "sci-fi", name: "Sci-Fi", bodyClass: "theme-sci-fi",
+      initial: "S", icon: "scifi", tapeCode: "T-120",
+      motifs: "Starships · Aliens · Distant Worlds",
+      hero: "assets/images/themes/sci-fi.jpg"
     }
   ];
 
