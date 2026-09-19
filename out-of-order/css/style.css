@@ -2190,12 +2190,20 @@ body.heat-onfire .tape-label { transform: rotate(-2.4deg); }
   .powerup { min-height: 44px; padding: 0.2rem 0.5rem; }
 
   /* ORDER: smaller poster, title and meta strip; the Earlier/Later
-     buttons keep their 44px touch target, just tighter padding around it */
+     buttons keep their 44px touch target, just tighter padding around it.
+     "Move earlier"/"Move later" stay as the button's accessible name
+     (aria-label) even though the visible word is hidden here — three
+     cards side by side don't leave room for full text next to the icon
+     without it overflowing the card, so icon-only is the fix, not
+     dropping the button (drag alone isn't reliable for every player). */
+  .order-card { min-width: 0; }
   .order-card__meta { padding: 0.3rem 0.4rem; font-size: 0.56rem; }
   .order-card__art { aspect-ratio: 2 / 1; }
   .order-card__title { font-size: 0.8rem; padding: 0.35rem 0.4rem 0.2rem; line-height: 1.1; }
   .order-card__controls { padding: 0.3rem; gap: 0.25rem; }
-  .order-card__move { min-height: 44px; padding: 0.3rem 0.2rem; font-size: 0.62rem; gap: 0.2rem; }
+  .order-card__move { min-height: 44px; min-width: 0; padding: 0.3rem; gap: 0; }
+  .order-card__move-text { display: none; }
+  .order-card__move span[aria-hidden] { font-size: 1.1rem; }
   .year-tag { font-size: 0.72rem; margin: 0 0.4rem 0.3rem; padding: 1px 6px; }
 
   /* WHICH CAME FIRST + ODD ONE OUT: posters already capped by width in

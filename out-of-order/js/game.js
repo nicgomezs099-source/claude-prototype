@@ -1311,10 +1311,10 @@
       '<p class="order-card__title">' + titleWithVersion(item) + '</p>' +
       yearTag(item) +
       '<div class="order-card__controls">' +
-        '<button type="button" class="order-card__move" data-move="earlier">' +
-          '<span aria-hidden="true">↑</span> Earlier</button>' +
-        '<button type="button" class="order-card__move" data-move="later">' +
-          '<span aria-hidden="true">↓</span> Later</button>' +
+        '<button type="button" class="order-card__move" data-move="earlier" aria-label="Move earlier">' +
+          '<span aria-hidden="true">↑</span><span class="order-card__move-text"> Earlier</span></button>' +
+        '<button type="button" class="order-card__move" data-move="later" aria-label="Move later">' +
+          '<span aria-hidden="true">↓</span><span class="order-card__move-text"> Later</span></button>' +
       '</div>';
 
     loadPosterImage($(".order-card__art", li), cardArtSrc(item), item.focus);
