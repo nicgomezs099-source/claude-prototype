@@ -496,6 +496,16 @@
         if (THEMES[j].id === betaPick) return THEMES[j];
       }
     }
+
+    // TEMPORARY — pinned to Sci-Fi for presentation day, so every visitor
+    // sees the same theme no matter their own device's date/timezone
+    // (the calendar rotation was flipping between Horror/Sci-Fi depending
+    // on whose "today" it was). Delete this block to restore the normal
+    // day-by-day rotation below once presenting is done.
+    for (var k = 0; k < THEMES.length; k++) {
+      if (THEMES[k].id === "sci-fi") return THEMES[k];
+    }
+
     var d = date || new Date();
     var index = ((dayNumber(d) % THEMES.length) + THEMES.length) % THEMES.length;
     return THEMES[index];
